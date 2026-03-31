@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useOrderRealtime } from '@/hooks/useOrderRealtime';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -26,9 +27,10 @@ const StaffDashboard = () => {
         .order('created_at', { ascending: false });
       return data || [];
     },
-    refetchInterval: 3000,
     enabled: !!branchId,
   });
+
+  useOrderRealtime(branchId, [['staff-orders', branchId!]]);
 
   const updateStatus = useMutation({
     mutationFn: async ({ orderId, status }: { orderId: string; status: string }) => {

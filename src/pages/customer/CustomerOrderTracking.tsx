@@ -1,5 +1,6 @@
 import { useParams, useOutletContext } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { useOrderTrackingRealtime } from '@/hooks/useOrderRealtime';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -34,8 +35,9 @@ const CustomerOrderTracking = () => {
         .single();
       return data;
     },
-    refetchInterval: 5000, // Poll every 5s for real-time feel
   });
+
+  useOrderTrackingRealtime(orderId, [['order', orderId!]]);
 
   const handlePayment = async () => {
     if (!order) return;
