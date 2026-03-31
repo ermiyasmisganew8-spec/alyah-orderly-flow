@@ -31,7 +31,7 @@ const StaffDashboard = () => {
     enabled: !!branchId,
   });
 
-  const updateStatus = useMutation({
+  useOrderRealtime(branchId, [['staff-orders', branchId!]]);
     mutationFn: async ({ orderId, status }: { orderId: string; status: string }) => {
       const { error } = await supabase
         .from('orders')
