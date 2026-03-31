@@ -25,7 +25,27 @@ import StaffDashboard from "@/pages/staff/StaffDashboard";
 import BranchAdminLayout from "@/components/admin/BranchAdminLayout";
 import BranchDashboard from "@/pages/branch-admin/BranchDashboard";
 import MenuManagement from "@/pages/branch-admin/MenuManagement";
+import BranchPromotions from "@/pages/branch-admin/BranchPromotions";
+import BranchAnalytics from "@/pages/branch-admin/BranchAnalytics";
+import BranchStaff from "@/pages/branch-admin/BranchStaff";
 import BranchFeedback from "@/pages/branch-admin/BranchFeedback";
+import BranchSettings from "@/pages/branch-admin/BranchSettings";
+
+// Company Admin
+import CompanyAdminLayout from "@/components/admin/CompanyAdminLayout";
+import CompanyDashboard from "@/pages/company-admin/CompanyDashboard";
+import AdminManagement from "@/pages/company-admin/AdminManagement";
+import CompanyPermissions from "@/pages/company-admin/CompanyPermissions";
+import BranchManagement from "@/pages/company-admin/BranchManagement";
+import CompanySettings from "@/pages/company-admin/CompanySettings";
+
+// Platform Admin
+import PlatformAdminLayout from "@/components/admin/PlatformAdminLayout";
+import PlatformDashboard from "@/pages/platform-admin/PlatformDashboard";
+import CompanyManagement from "@/pages/platform-admin/CompanyManagement";
+import GlobalSettings from "@/pages/platform-admin/GlobalSettings";
+import SecurityLogs from "@/pages/platform-admin/SecurityLogs";
+import FinancialReports from "@/pages/platform-admin/FinancialReports";
 
 const queryClient = new QueryClient();
 
@@ -61,14 +81,32 @@ const App = () => (
             <Route path="/branch-admin" element={<BranchAdminLayout />}>
               <Route index element={<BranchDashboard />} />
               <Route path="menu" element={<MenuManagement />} />
+              <Route path="promotions" element={<BranchPromotions />} />
+              <Route path="analytics" element={<BranchAnalytics />} />
+              <Route path="staff" element={<BranchStaff />} />
               <Route path="feedback" element={<BranchFeedback />} />
+              <Route path="settings" element={<BranchSettings />} />
             </Route>
 
             {/* Company Admin */}
             <Route path="/company-admin/login" element={<AdminLogin title="Company Admin Login" expectedRole="company_admin" redirectPath="/company-admin" />} />
+            <Route path="/company-admin" element={<CompanyAdminLayout />}>
+              <Route index element={<CompanyDashboard />} />
+              <Route path="admins" element={<AdminManagement />} />
+              <Route path="permissions" element={<CompanyPermissions />} />
+              <Route path="branches" element={<BranchManagement />} />
+              <Route path="settings" element={<CompanySettings />} />
+            </Route>
 
             {/* Platform Admin */}
             <Route path="/platform-admin/login" element={<AdminLogin title="Platform Admin Login" expectedRole="platform_admin" redirectPath="/platform-admin" />} />
+            <Route path="/platform-admin" element={<PlatformAdminLayout />}>
+              <Route index element={<PlatformDashboard />} />
+              <Route path="companies" element={<CompanyManagement />} />
+              <Route path="settings" element={<GlobalSettings />} />
+              <Route path="security" element={<SecurityLogs />} />
+              <Route path="reports" element={<FinancialReports />} />
+            </Route>
 
             <Route path="*" element={<NotFound />} />
           </Routes>
