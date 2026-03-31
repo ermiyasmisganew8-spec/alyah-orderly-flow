@@ -27,11 +27,12 @@ const StaffDashboard = () => {
         .order('created_at', { ascending: false });
       return data || [];
     },
-    refetchInterval: 3000,
     enabled: !!branchId,
   });
 
   useOrderRealtime(branchId, [['staff-orders', branchId!]]);
+
+  const updateStatus = useMutation({
     mutationFn: async ({ orderId, status }: { orderId: string; status: string }) => {
       const { error } = await supabase
         .from('orders')
