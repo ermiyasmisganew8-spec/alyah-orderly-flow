@@ -35,8 +35,9 @@ const CustomerOrderTracking = () => {
         .single();
       return data;
     },
-    refetchInterval: 5000, // Poll every 5s for real-time feel
   });
+
+  useOrderTrackingRealtime(orderId, [['order', orderId!]]);
 
   const handlePayment = async () => {
     if (!order) return;
