@@ -8,13 +8,15 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Plus, Pencil } from 'lucide-react';
+import { Plus, Pencil, Copy, Check } from 'lucide-react';
 
 const cardStyle = { background: 'hsl(222, 40%, 10%)', border: '1px solid hsl(222, 30%, 18%)' };
 
 const CompanyManagement = () => {
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
+  const [credentialModal, setCredentialModal] = useState<{ email: string; password: string; companyName: string } | null>(null);
+  const [copied, setCopied] = useState(false);
   const [editItem, setEditItem] = useState<any>(null);
   const [form, setForm] = useState({ name: '', contact_email: '', admin_email: '', admin_password: '', admin_name: '' });
 
@@ -50,18 +52,26 @@ const CompanyManagement = () => {
         }).select().single();
         if (compErr || !company) throw compErr;
 
-        // Create company admin if provided
+        // Create company admin via edge function if provided
         if (form.admin_email && form.admin_password) {
-          const { data: authData, error: authErr } = await supabase.auth.signUp({
-            email: form.admin_email, password: form.admin_password,
-            options: { data: { full_name: form.admin_name || form.admin_email } },
+          const { data, error: fnErr } = await supabase.functions.invoke('create-admin-user', {
+            body: {
+              email: form.admin_email,
+              password: form.admin_password,
+              full_name: form.admin_name || form.admin_email,
+              role: 'company_admin',
+              company_id: company.id,
+            },
           });
-          if (authErr) throw authErr;
-          if (authData.user) {
-            await supabase.from('user_roles').insert({
-              user_id: authData.user.id, role: 'company_admin' as any, company_id: company.id,
-            });
-          }
+          if (fnErr) throw fnErr;
+          if (data?.error) throw new Error(data.error);
+
+          // Show credentials modal
+          setCredentialModal({
+            email: form.admin_email,
+            password: form.admin_password,
+            companyName: form.name,
+          });
         }
       }
     },
@@ -96,6 +106,13 @@ const CompanyManagement = () => {
     return { branches: cBranches.length, revenue: rev };
   };
 
+  const handleCopyCredentials = () => {
+    if (!credentialModal) return;
+    navigator.clipboard.writeText(`Email: ${credentialModal.email}\nPassword: ${credentialModal.password}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -118,6 +135,30 @@ const CompanyManagement = () => {
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* Credentials Modal */}
+      <Dialog open={!!credentialModal} onOpenChange={() => { setCredentialModal(null); setCopied(false); }}>
+        <DialogContent className="dark" style={{ background: 'hsl(222, 40%, 10%)', border: '1px solid hsl(222, 30%, 18%)', color: 'hsl(210, 30%, 92%)' }}>
+          <DialogHeader><DialogTitle className="font-display">Admin Credentials Created</DialogTitle></DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm" style={{ color: 'hsl(210, 15%, 75%)' }}>
+              The company <strong>{credentialModal?.companyName}</strong> has been created with the following admin credentials. Please save them securely.
+            </p>
+            <div className="rounded-lg p-4" style={{ background: 'hsl(222, 35%, 14%)', border: '1px solid hsl(222, 30%, 22%)' }}>
+              <div className="space-y-2 text-sm font-mono">
+                <p><span style={{ color: 'hsl(210, 15%, 55%)' }}>Email:</span> {credentialModal?.email}</p>
+                <p><span style={{ color: 'hsl(210, 15%, 55%)' }}>Password:</span> {credentialModal?.password}</p>
+              </div>
+            </div>
+            <Button className="w-full" onClick={handleCopyCredentials}>
+              {copied ? <><Check className="h-4 w-4 mr-2" /> Copied!</> : <><Copy className="h-4 w-4 mr-2" /> Copy Credentials</>}
+            </Button>
+            <p className="text-xs text-center" style={{ color: 'hsl(210, 15%, 45%)' }}>
+              The admin can log in at /login with the Company Admin role.
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Card style={cardStyle} className="border-0">
         <CardContent className="p-0">

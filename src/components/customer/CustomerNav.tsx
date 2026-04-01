@@ -10,9 +10,10 @@ interface CustomerNavProps {
   companyId: string;
   branchId: string;
   tableNumber: number;
+  companyName: string;
 }
 
-const CustomerNav = ({ companyId, branchId, tableNumber }: CustomerNavProps) => {
+const CustomerNav = ({ companyId, branchId, tableNumber, companyName }: CustomerNavProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { totalItems } = useCart();
   const { user } = useAuth();
@@ -34,7 +35,7 @@ const CustomerNav = ({ companyId, branchId, tableNumber }: CustomerNavProps) => 
     <nav className="sticky top-0 z-50 bg-card/95 backdrop-blur-md border-b shadow-card">
       <div className="container mx-auto px-4 flex items-center justify-between h-16">
         <Link to={`${base}${tableParam}`} className="font-display text-xl font-bold text-primary">
-          Canoe Cafe
+          {companyName}
         </Link>
 
         {/* Desktop */}

@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Plus, UserX } from 'lucide-react';
+import { Plus } from 'lucide-react';
 
 const AdminManagement = () => {
   const { companyId } = useAuth();
@@ -42,16 +42,19 @@ const AdminManagement = () => {
 
   const addAdmin = useMutation({
     mutationFn: async () => {
-      const { data: authData, error: authErr } = await supabase.auth.signUp({
-        email: form.email, password: form.password,
-        options: { data: { full_name: form.full_name } },
-      });
-      if (authErr || !authData.user) throw authErr || new Error('Failed');
-      const { error } = await supabase.from('user_roles').insert({
-        user_id: authData.user.id, role: 'branch_admin' as any,
-        branch_id: form.branch_id || null, company_id: companyId,
+      // Use edge function to create user without affecting current session
+      const { data, error } = await supabase.functions.invoke('create-admin-user', {
+        body: {
+          email: form.email,
+          password: form.password,
+          full_name: form.full_name,
+          role: 'branch_admin',
+          company_id: companyId,
+          branch_id: form.branch_id || null,
+        },
       });
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['branch-admins'] });
