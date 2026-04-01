@@ -40,7 +40,7 @@ const CustomerHome = () => {
           <h1 className="text-4xl md:text-6xl font-display font-bold text-primary-foreground mb-4">
             Welcome to Canoe
           </h1>
-          <p className="text-lg md:text-xl text-primary-foreground/90 mb-2">Ethiopian Café</p>
+          <p className="text-lg md:text-xl text-primary-foreground/90 mb-2">Cafe and Restaurant</p>
           <p className="text-primary-foreground/70 mb-8">Table {tableNumber} • Authentic flavors of Ethiopia</p>
           <Link to={`${base}/menu${tp}`}>
             <Button size="lg" className="bg-hero-gradient text-primary-foreground shadow-warm hover:opacity-90 transition-opacity">
