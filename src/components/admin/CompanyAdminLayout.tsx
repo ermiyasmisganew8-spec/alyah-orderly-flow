@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCompanyName } from '@/hooks/useCompanyName';
 import { Button } from '@/components/ui/button';
 import {
   LayoutDashboard, Users, Shield, Building2, Settings, Menu, X, LogOut
@@ -16,8 +17,9 @@ const sidebarItems = [
 
 const CompanyAdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { signOut } = useAuth();
+  const { signOut, companyId } = useAuth();
   const location = useLocation();
+  const companyName = useCompanyName(companyId);
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -25,7 +27,7 @@ const CompanyAdminLayout = () => {
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static`}>
         <div className="p-4 border-b border-sidebar-border">
           <h1 className="font-display text-lg font-bold text-sidebar-primary">Company Admin</h1>
-          <p className="text-xs text-sidebar-foreground/60">Canoe Ethiopian Café</p>
+          <p className="text-xs text-sidebar-foreground/60">{companyName} Cafe and Restaurant</p>
         </div>
         <nav className="p-2 space-y-1">
           {sidebarItems.map(item => (

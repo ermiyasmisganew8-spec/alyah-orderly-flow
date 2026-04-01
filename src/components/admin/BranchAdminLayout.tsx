@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCompanyName } from '@/hooks/useCompanyName';
 import { Button } from '@/components/ui/button';
 import {
   LayoutDashboard, UtensilsCrossed, Tag, BarChart3, Users, MessageSquare, Settings, Menu, X, LogOut
@@ -19,17 +20,17 @@ const sidebarItems = [
 
 const BranchAdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { signOut } = useAuth();
+  const { signOut, companyId } = useAuth();
   const location = useLocation();
+  const companyName = useCompanyName(companyId);
 
   return (
     <div className="min-h-screen bg-background flex">
-      {/* Sidebar */}
       <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-sidebar text-sidebar-foreground transform transition-transform duration-200 
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static`}>
         <div className="p-4 border-b border-sidebar-border">
           <h1 className="font-display text-lg font-bold text-sidebar-primary">Branch Admin</h1>
-          <p className="text-xs text-sidebar-foreground/60">Canoe Cafe and Restaurant</p>
+          <p className="text-xs text-sidebar-foreground/60">{companyName} Cafe and Restaurant</p>
         </div>
         <nav className="p-2 space-y-1">
           {sidebarItems.map(item => (
@@ -55,10 +56,8 @@ const BranchAdminLayout = () => {
         </div>
       </aside>
 
-      {/* Overlay */}
       {sidebarOpen && <div className="fixed inset-0 z-40 bg-foreground/20 md:hidden" onClick={() => setSidebarOpen(false)} />}
 
-      {/* Main */}
       <div className="flex-1 md:ml-0">
         <header className="sticky top-0 z-30 bg-card/95 backdrop-blur-md border-b h-14 flex items-center px-4 md:hidden">
           <button onClick={() => setSidebarOpen(!sidebarOpen)}>
