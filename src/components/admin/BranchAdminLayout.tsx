@@ -8,7 +8,8 @@ import {
 
 const sidebarItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/branch-admin' },
-  { icon: UtensilsCrossed, label: 'Menu Management', path: '/branch-admin/menu' },
+  { icon: UtensilsCrossed, label: 'Menu Items', path: '/branch-admin/menu' },
+  { icon: Tag, label: 'Categories', path: '/branch-admin/categories' },
   { icon: Tag, label: 'Promotions', path: '/branch-admin/promotions' },
   { icon: BarChart3, label: 'Analytics', path: '/branch-admin/analytics' },
   { icon: Users, label: 'Staff', path: '/branch-admin/staff' },
