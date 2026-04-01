@@ -17,14 +17,19 @@ import CustomerCart from "@/pages/customer/CustomerCart";
 import CustomerOrderTracking from "@/pages/customer/CustomerOrderTracking";
 import CustomerLogin from "@/pages/customer/CustomerLogin";
 
+// Unified Login
+import Login from "@/pages/Login";
+
 // Staff
-import AdminLogin from "@/components/auth/AdminLogin";
-import StaffDashboard from "@/pages/staff/StaffDashboard";
+import StaffLayout from "@/components/staff/StaffLayout";
+import StaffDashboardContent from "@/pages/staff/StaffDashboardContent";
+import StaffSettings from "@/pages/staff/StaffSettings";
 
 // Branch Admin
 import BranchAdminLayout from "@/components/admin/BranchAdminLayout";
 import BranchDashboard from "@/pages/branch-admin/BranchDashboard";
 import MenuManagement from "@/pages/branch-admin/MenuManagement";
+import CategoryManagement from "@/pages/branch-admin/CategoryManagement";
 import BranchPromotions from "@/pages/branch-admin/BranchPromotions";
 import BranchAnalytics from "@/pages/branch-admin/BranchAnalytics";
 import BranchStaff from "@/pages/branch-admin/BranchStaff";
@@ -46,6 +51,7 @@ import CompanyManagement from "@/pages/platform-admin/CompanyManagement";
 import GlobalSettings from "@/pages/platform-admin/GlobalSettings";
 import SecurityLogs from "@/pages/platform-admin/SecurityLogs";
 import FinancialReports from "@/pages/platform-admin/FinancialReports";
+import AdminLogin from "@/components/auth/AdminLogin";
 
 const queryClient = new QueryClient();
 
@@ -72,15 +78,20 @@ const App = () => (
               <Route path="login" element={<CustomerLogin />} />
             </Route>
 
-            {/* Staff */}
-            <Route path="/staff/login" element={<AdminLogin title="Staff Login" expectedRole="staff" redirectPath="/staff" />} />
-            <Route path="/staff" element={<StaffDashboard />} />
+            {/* Unified Login */}
+            <Route path="/login" element={<Login />} />
+
+            {/* Staff with sidebar layout */}
+            <Route path="/staff" element={<StaffLayout />}>
+              <Route index element={<StaffDashboardContent />} />
+              <Route path="settings" element={<StaffSettings />} />
+            </Route>
 
             {/* Branch Admin */}
-            <Route path="/branch-admin/login" element={<AdminLogin title="Branch Admin Login" expectedRole="branch_admin" redirectPath="/branch-admin" />} />
             <Route path="/branch-admin" element={<BranchAdminLayout />}>
               <Route index element={<BranchDashboard />} />
               <Route path="menu" element={<MenuManagement />} />
+              <Route path="categories" element={<CategoryManagement />} />
               <Route path="promotions" element={<BranchPromotions />} />
               <Route path="analytics" element={<BranchAnalytics />} />
               <Route path="staff" element={<BranchStaff />} />
@@ -89,7 +100,6 @@ const App = () => (
             </Route>
 
             {/* Company Admin */}
-            <Route path="/company-admin/login" element={<AdminLogin title="Company Admin Login" expectedRole="company_admin" redirectPath="/company-admin" />} />
             <Route path="/company-admin" element={<CompanyAdminLayout />}>
               <Route index element={<CompanyDashboard />} />
               <Route path="admins" element={<AdminManagement />} />
@@ -98,7 +108,7 @@ const App = () => (
               <Route path="settings" element={<CompanySettings />} />
             </Route>
 
-            {/* Platform Admin */}
+            {/* Platform Admin - separate login */}
             <Route path="/platform-admin/login" element={<AdminLogin title="Platform Admin Login" expectedRole="platform_admin" redirectPath="/platform-admin" />} />
             <Route path="/platform-admin" element={<PlatformAdminLayout />}>
               <Route index element={<PlatformDashboard />} />

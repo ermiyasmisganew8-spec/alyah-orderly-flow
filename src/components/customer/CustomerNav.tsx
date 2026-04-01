@@ -34,7 +34,7 @@ const CustomerNav = ({ companyId, branchId, tableNumber }: CustomerNavProps) => 
     <nav className="sticky top-0 z-50 bg-card/95 backdrop-blur-md border-b shadow-card">
       <div className="container mx-auto px-4 flex items-center justify-between h-16">
         <Link to={`${base}${tableParam}`} className="font-display text-xl font-bold text-primary">
-          Canoe
+          Canoe Cafe
         </Link>
 
         {/* Desktop */}

@@ -8,7 +8,8 @@ import {
 
 const sidebarItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/branch-admin' },
-  { icon: UtensilsCrossed, label: 'Menu Management', path: '/branch-admin/menu' },
+  { icon: UtensilsCrossed, label: 'Menu Items', path: '/branch-admin/menu' },
+  { icon: Tag, label: 'Categories', path: '/branch-admin/categories' },
   { icon: Tag, label: 'Promotions', path: '/branch-admin/promotions' },
   { icon: BarChart3, label: 'Analytics', path: '/branch-admin/analytics' },
   { icon: Users, label: 'Staff', path: '/branch-admin/staff' },
@@ -28,7 +29,7 @@ const BranchAdminLayout = () => {
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static`}>
         <div className="p-4 border-b border-sidebar-border">
           <h1 className="font-display text-lg font-bold text-sidebar-primary">Branch Admin</h1>
-          <p className="text-xs text-sidebar-foreground/60">Canoe Ethiopian Café</p>
+          <p className="text-xs text-sidebar-foreground/60">Canoe Cafe and Restaurant</p>
         </div>
         <nav className="p-2 space-y-1">
           {sidebarItems.map(item => (
