@@ -1,5 +1,6 @@
 import { Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCompanyName } from '@/hooks/useCompanyName';
 import { NavLink } from '@/components/NavLink';
 import { ChefHat, Settings, LogOut, LayoutDashboard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -9,8 +10,9 @@ import {
 } from '@/components/ui/sidebar';
 
 const StaffLayout = () => {
-  const { signOut } = useAuth();
+  const { signOut, companyId } = useAuth();
   const navigate = useNavigate();
+  const companyName = useCompanyName(companyId);
 
   const handleLogout = async () => {
     await signOut();
@@ -58,7 +60,7 @@ const StaffLayout = () => {
         <div className="flex-1 flex flex-col">
           <header className="h-14 flex items-center border-b px-4 bg-card">
             <SidebarTrigger className="mr-4" />
-            <span className="font-display text-lg font-bold">Canoe Cafe and Restaurant – Staff</span>
+            <span className="font-display text-lg font-bold">{companyName} Cafe and Restaurant – Staff</span>
           </header>
           <main className="flex-1 p-6">
             <Outlet />

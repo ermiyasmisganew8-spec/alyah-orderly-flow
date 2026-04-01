@@ -11,10 +11,11 @@ interface OutletCtx {
   companyId: string;
   branchId: string;
   tableNumber: number;
+  companyName: string;
 }
 
 const CustomerHome = () => {
-  const { companyId, branchId, tableNumber } = useOutletContext<OutletCtx>();
+  const { companyId, branchId, tableNumber, companyName } = useOutletContext<OutletCtx>();
   const base = `/b/${companyId}/${branchId}`;
   const tp = `?table=${tableNumber}`;
 
@@ -31,15 +32,17 @@ const CustomerHome = () => {
     },
   });
 
+  const qrUrl = `${window.location.origin}${base}?table=${tableNumber}`;
+
   return (
     <div>
       {/* Hero */}
       <section className="relative h-[70vh] min-h-[500px] flex items-center justify-center overflow-hidden">
-        <img src={heroBg} alt="Canoe Ethiopian Café" className="absolute inset-0 w-full h-full object-cover" width={1920} height={1080} />
+        <img src={heroBg} alt={`${companyName} Cafe`} className="absolute inset-0 w-full h-full object-cover" width={1920} height={1080} />
         <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/40 to-transparent" />
         <div className="relative z-10 text-center px-4 max-w-2xl animate-fade-in">
           <h1 className="text-4xl md:text-6xl font-display font-bold text-primary-foreground mb-4">
-            Welcome to Canoe
+            Welcome to {companyName}
           </h1>
           <p className="text-lg md:text-xl text-primary-foreground/90 mb-2">Cafe and Restaurant</p>
           <p className="text-primary-foreground/70 mb-8">Table {tableNumber} • Authentic flavors of Ethiopia</p>
@@ -77,7 +80,7 @@ const CustomerHome = () => {
         <h2 className="text-3xl font-display font-bold mb-4">Scan to Order</h2>
         <p className="text-muted-foreground mb-6">Share this QR code with your guests</p>
         <div className="inline-block bg-card p-6 rounded-2xl shadow-card">
-          <QRCodeSVG value={`${window.location.origin}${base}${tp}`} size={200} />
+          <QRCodeSVG value={qrUrl} size={200} />
           <p className="text-xs text-muted-foreground mt-3">Table {tableNumber}</p>
         </div>
       </section>
@@ -85,7 +88,7 @@ const CustomerHome = () => {
       {/* Why Choose Us */}
       <section className="bg-secondary/50 py-16">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-display font-bold text-center mb-12">Why Choose Canoe</h2>
+          <h2 className="text-3xl font-display font-bold text-center mb-12">Why Choose {companyName}</h2>
           <div className="grid md:grid-cols-3 gap-8">
             {[
               { icon: Utensils, title: 'Authentic Recipes', desc: 'Traditional Ethiopian dishes prepared with love and authentic spices' },

@@ -1,13 +1,16 @@
+import { useState } from 'react';
 import { useParams, useOutletContext } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useOrderTrackingRealtime } from '@/hooks/useOrderRealtime';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS } from '@/lib/constants';
-import { CheckCircle, Clock, ChefHat, UtensilsCrossed } from 'lucide-react';
+import { ORDER_STATUS_LABELS } from '@/lib/constants';
+import { CheckCircle, Clock, ChefHat, UtensilsCrossed, Star, MessageSquare } from 'lucide-react';
 
 interface OutletCtx {
   branchId: string;
@@ -24,6 +27,11 @@ const statusIcons: Record<string, React.ElementType> = {
 const CustomerOrderTracking = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const { branchId } = useOutletContext<OutletCtx>();
+  const queryClient = useQueryClient();
+
+  const [feedbackItem, setFeedbackItem] = useState<{ id: string; name: string } | null>(null);
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState('');
 
   const { data: order, refetch } = useQuery({
     queryKey: ['order', orderId],
@@ -37,7 +45,38 @@ const CustomerOrderTracking = () => {
     },
   });
 
+  const { data: existingFeedback } = useQuery({
+    queryKey: ['order-feedback', orderId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('feedback')
+        .select('*')
+        .eq('order_id', orderId!);
+      return data || [];
+    },
+    enabled: !!orderId,
+  });
+
   useOrderTrackingRealtime(orderId, [['order', orderId!]]);
+
+  const submitFeedback = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.from('feedback').insert({
+        order_id: orderId!,
+        rating,
+        comment: comment || null,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['order-feedback', orderId] });
+      toast.success('Thank you for your feedback!');
+      setFeedbackItem(null);
+      setRating(5);
+      setComment('');
+    },
+    onError: () => toast.error('Failed to submit feedback'),
+  });
 
   const handlePayment = async () => {
     if (!order) return;
@@ -64,6 +103,7 @@ const CustomerOrderTracking = () => {
   const steps = ['pending', 'preparing', 'served', 'paid'];
   const currentStep = steps.indexOf(order.status);
   const StatusIcon = statusIcons[order.status] || Clock;
+  const hasFeedback = existingFeedback && existingFeedback.length > 0;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
@@ -108,9 +148,30 @@ const CustomerOrderTracking = () => {
         <CardContent className="p-4 space-y-3">
           <h3 className="font-semibold">Items</h3>
           {order.order_items?.map((item: any) => (
-            <div key={item.id} className="flex justify-between text-sm">
-              <span>{item.quantity}x {item.menu_items?.name || 'Item'}</span>
-              <span className="font-medium">{item.subtotal} ETB</span>
+            <div key={item.id} className="flex justify-between items-center text-sm">
+              <div className="flex-1">
+                <span>{item.quantity}x {item.menu_items?.name || 'Item'}</span>
+              </div>
+              <span className="font-medium mr-3">{item.subtotal} ETB</span>
+              {order.status === 'paid' && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 text-xs"
+                  disabled={hasFeedback}
+                  onClick={() => {
+                    setFeedbackItem({ id: item.menu_item_id, name: item.menu_items?.name || 'Item' });
+                    setRating(5);
+                    setComment('');
+                  }}
+                >
+                  {hasFeedback ? (
+                    <><CheckCircle className="h-3 w-3 mr-1" /> Reviewed</>
+                  ) : (
+                    <><MessageSquare className="h-3 w-3 mr-1" /> Feedback</>
+                  )}
+                </Button>
+              )}
             </div>
           ))}
           <div className="border-t pt-2 flex justify-between font-bold">
@@ -126,6 +187,47 @@ const CustomerOrderTracking = () => {
           Pay Now — {order.total_amount} ETB
         </Button>
       )}
+
+      {/* Feedback Modal */}
+      <Dialog open={!!feedbackItem} onOpenChange={() => setFeedbackItem(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display">Rate {feedbackItem?.name}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {/* Star Rating */}
+            <div className="flex justify-center gap-2">
+              {[1, 2, 3, 4, 5].map(star => (
+                <button
+                  key={star}
+                  onClick={() => setRating(star)}
+                  className="transition-transform hover:scale-110"
+                >
+                  <Star
+                    className={`h-8 w-8 ${star <= rating ? 'fill-primary text-primary' : 'text-muted-foreground'}`}
+                  />
+                </button>
+              ))}
+            </div>
+            <p className="text-center text-sm text-muted-foreground">
+              {rating === 1 ? 'Poor' : rating === 2 ? 'Fair' : rating === 3 ? 'Good' : rating === 4 ? 'Very Good' : 'Excellent'}
+            </p>
+            <Textarea
+              placeholder="Share your experience (optional)"
+              value={comment}
+              onChange={e => setComment(e.target.value)}
+              rows={3}
+            />
+            <Button
+              className="w-full"
+              onClick={() => submitFeedback.mutate()}
+              disabled={submitFeedback.isPending}
+            >
+              {submitFeedback.isPending ? 'Submitting...' : 'Submit Feedback'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
