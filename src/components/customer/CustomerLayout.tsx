@@ -18,7 +18,7 @@ const CustomerLayout = () => {
         <Outlet context={{ companyId, branchId, tableNumber }} />
         <footer className="border-t bg-card py-8 mt-12">
           <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-            <p className="font-display text-lg font-semibold text-foreground mb-2">Canoe Ethiopian Café</p>
+            <p className="font-display text-lg font-semibold text-foreground mb-2">Canoe Cafe and Restaurant</p>
             <p>123 in front of poly campus, Bahir Dar</p>
             <p className="mt-1">Open Daily: 7:00 AM – 10:00 PM</p>
             <p className="mt-4 text-xs">Powered by Alyah Menu</p>

@@ -29,7 +29,7 @@ const BranchAdminLayout = () => {
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static`}>
         <div className="p-4 border-b border-sidebar-border">
           <h1 className="font-display text-lg font-bold text-sidebar-primary">Branch Admin</h1>
-          <p className="text-xs text-sidebar-foreground/60">Canoe Ethiopian Café</p>
+          <p className="text-xs text-sidebar-foreground/60">Canoe Cafe and Restaurant</p>
         </div>
         <nav className="p-2 space-y-1">
           {sidebarItems.map(item => (

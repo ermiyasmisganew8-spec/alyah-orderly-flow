@@ -72,6 +72,16 @@ const CustomerHome = () => {
         </section>
       )}
 
+      {/* QR Code */}
+      <section className="container mx-auto px-4 py-16 text-center">
+        <h2 className="text-3xl font-display font-bold mb-4">Scan to Order</h2>
+        <p className="text-muted-foreground mb-6">Share this QR code with your guests</p>
+        <div className="inline-block bg-card p-6 rounded-2xl shadow-card">
+          <QRCodeSVG value={`${window.location.origin}${base}${tp}`} size={200} />
+          <p className="text-xs text-muted-foreground mt-3">Table {tableNumber}</p>
+        </div>
+      </section>
+
       {/* Why Choose Us */}
       <section className="bg-secondary/50 py-16">
         <div className="container mx-auto px-4">
