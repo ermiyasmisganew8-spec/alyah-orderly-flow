@@ -7,15 +7,22 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Plus, Pencil, UserX } from 'lucide-react';
+import { Plus, UserX } from 'lucide-react';
+
+interface StaffCred {
+  email: string;
+  password: string;
+}
 
 const BranchStaff = () => {
   const { branchId, companyId } = useAuth();
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
   const [form, setForm] = useState({ full_name: '', email: '', phone: '', password: '' });
+  const [staffCreds, setStaffCreds] = useState<Record<string, StaffCred>>({});
 
   const { data: staffRoles } = useQuery({
     queryKey: ['branch-staff', branchId],
@@ -32,26 +39,28 @@ const BranchStaff = () => {
 
   const addStaff = useMutation({
     mutationFn: async () => {
-      // Create user via signup (they'll need to verify email)
-      const { data: authData, error: authErr } = await supabase.auth.signUp({
-        email: form.email,
-        password: form.password,
-        options: { data: { full_name: form.full_name } },
+      // Use edge function to create user without affecting current session
+      const { data, error } = await supabase.functions.invoke('create-admin-user', {
+        body: {
+          email: form.email,
+          password: form.password,
+          full_name: form.full_name,
+          role: 'staff',
+          branch_id: branchId,
+          company_id: companyId,
+        },
       });
-      if (authErr || !authData.user) throw authErr || new Error('Failed to create user');
-
-      // Assign staff role
-      const { error: roleErr } = await supabase.from('user_roles').insert({
-        user_id: authData.user.id,
-        role: 'staff' as any,
-        branch_id: branchId!,
-        company_id: companyId,
-      });
-      if (roleErr) throw roleErr;
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
       // Update phone if provided
-      if (form.phone) {
-        await supabase.from('profiles').update({ phone: form.phone }).eq('user_id', authData.user.id);
+      if (form.phone && data?.user_id) {
+        await supabase.from('profiles').update({ phone: form.phone }).eq('user_id', data.user_id);
+      }
+
+      // Store credentials for tooltip
+      if (data?.user_id) {
+        setStaffCreds(prev => ({ ...prev, [data.user_id]: { email: form.email, password: form.password } }));
       }
     },
     onSuccess: () => {
@@ -75,66 +84,80 @@ const BranchStaff = () => {
   });
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-display font-bold">Staff Management</h1>
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-          <DialogTrigger asChild>
-            <Button><Plus className="h-4 w-4 mr-2" /> Add Staff</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader><DialogTitle className="font-display">Add Staff Member</DialogTitle></DialogHeader>
-            <form onSubmit={(e) => { e.preventDefault(); addStaff.mutate(); }} className="space-y-4">
-              <div><Label>Full Name</Label><Input value={form.full_name} onChange={e => setForm(f => ({ ...f, full_name: e.target.value }))} required /></div>
-              <div><Label>Email</Label><Input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required /></div>
-              <div><Label>Phone</Label><Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} /></div>
-              <div><Label>Password</Label><Input type="password" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} required minLength={6} /></div>
-              <Button type="submit" className="w-full" disabled={addStaff.isPending}>{addStaff.isPending ? 'Adding...' : 'Add Staff'}</Button>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
+    <TooltipProvider>
+      <div>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-display font-bold">Staff Management</h1>
+          <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+              <Button><Plus className="h-4 w-4 mr-2" /> Add Staff</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader><DialogTitle className="font-display">Add Staff Member</DialogTitle></DialogHeader>
+              <form onSubmit={(e) => { e.preventDefault(); addStaff.mutate(); }} className="space-y-4">
+                <div><Label>Full Name</Label><Input value={form.full_name} onChange={e => setForm(f => ({ ...f, full_name: e.target.value }))} required /></div>
+                <div><Label>Email</Label><Input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required /></div>
+                <div><Label>Phone</Label><Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} /></div>
+                <div><Label>Password</Label><Input type="password" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} required minLength={6} /></div>
+                <Button type="submit" className="w-full" disabled={addStaff.isPending}>{addStaff.isPending ? 'Adding...' : 'Add Staff'}</Button>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </div>
 
-      <Card className="shadow-card border-0">
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-left text-muted-foreground bg-muted/50">
-                  <th className="p-3">Name</th>
-                  <th className="p-3">Email</th>
-                  <th className="p-3">Phone</th>
-                  <th className="p-3">Status</th>
-                  <th className="p-3">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {staffRoles?.map((sr: any) => (
-                  <tr key={sr.id} className="border-b last:border-0 hover:bg-muted/30">
-                    <td className="p-3 font-medium">{sr.profiles?.full_name}</td>
-                    <td className="p-3 text-muted-foreground">{sr.profiles?.email}</td>
-                    <td className="p-3 text-muted-foreground">{sr.profiles?.phone || '—'}</td>
-                    <td className="p-3">
-                      <Badge variant={sr.profiles?.is_active ? 'default' : 'secondary'}>
-                        {sr.profiles?.is_active ? 'Active' : 'Inactive'}
-                      </Badge>
-                    </td>
-                    <td className="p-3">
-                      <Button variant="ghost" size="sm" onClick={() => toggleActive.mutate({ userId: sr.user_id, isActive: sr.profiles?.is_active })}>
-                        <UserX className="h-3 w-3" />
-                      </Button>
-                    </td>
+        <Card className="shadow-card border-0">
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-left text-muted-foreground bg-muted/50">
+                    <th className="p-3">Name</th>
+                    <th className="p-3">Email</th>
+                    <th className="p-3">Phone</th>
+                    <th className="p-3">Status</th>
+                    <th className="p-3">Actions</th>
                   </tr>
-                ))}
-                {(!staffRoles || staffRoles.length === 0) && (
-                  <tr><td colSpan={5} className="p-6 text-center text-muted-foreground">No staff members yet</td></tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+                </thead>
+                <tbody>
+                  {staffRoles?.map((sr: any) => {
+                    const cred = staffCreds[sr.user_id];
+                    const row = (
+                      <tr key={sr.id} className="border-b last:border-0 hover:bg-muted/30">
+                        <td className="p-3 font-medium">{sr.profiles?.full_name}</td>
+                        <td className="p-3 text-muted-foreground">{sr.profiles?.email}</td>
+                        <td className="p-3 text-muted-foreground">{sr.profiles?.phone || '—'}</td>
+                        <td className="p-3">
+                          <Badge variant={sr.profiles?.is_active ? 'default' : 'secondary'}>
+                            {sr.profiles?.is_active ? 'Active' : 'Inactive'}
+                          </Badge>
+                        </td>
+                        <td className="p-3">
+                          <Button variant="ghost" size="sm" onClick={() => toggleActive.mutate({ userId: sr.user_id, isActive: sr.profiles?.is_active })}>
+                            <UserX className="h-3 w-3" />
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                    if (cred) {
+                      return (
+                        <Tooltip key={sr.id}>
+                          <TooltipTrigger asChild>{row}</TooltipTrigger>
+                          <TooltipContent><p className="text-xs">Email: {cred.email}<br/>Password: {cred.password}</p></TooltipContent>
+                        </Tooltip>
+                      );
+                    }
+                    return row;
+                  })}
+                  {(!staffRoles || staffRoles.length === 0) && (
+                    <tr><td colSpan={5} className="p-6 text-center text-muted-foreground">No staff members yet</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </TooltipProvider>
   );
 };
 

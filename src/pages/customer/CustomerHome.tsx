@@ -1,10 +1,9 @@
 import { useOutletContext, Link } from 'react-router-dom';
-import { ArrowRight, Star, Coffee, Utensils, Clock } from 'lucide-react';
+import { ArrowRight, Coffee, Utensils, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { QRCodeSVG } from 'qrcode.react';
 import heroBg from '@/assets/hero-bg.jpg';
 
 interface OutletCtx {
@@ -31,8 +30,6 @@ const CustomerHome = () => {
       return data || [];
     },
   });
-
-  const qrUrl = `${window.location.origin}${base}?table=${tableNumber}`;
 
   return (
     <div>
@@ -74,16 +71,6 @@ const CustomerHome = () => {
           </div>
         </section>
       )}
-
-      {/* QR Code */}
-      <section className="container mx-auto px-4 py-16 text-center">
-        <h2 className="text-3xl font-display font-bold mb-4">Scan to Order</h2>
-        <p className="text-muted-foreground mb-6">Share this QR code with your guests</p>
-        <div className="inline-block bg-card p-6 rounded-2xl shadow-card">
-          <QRCodeSVG value={qrUrl} size={200} />
-          <p className="text-xs text-muted-foreground mt-3">Table {tableNumber}</p>
-        </div>
-      </section>
 
       {/* Why Choose Us */}
       <section className="bg-secondary/50 py-16">

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,6 +18,12 @@ const PlatformAdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { signOut } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/platform-admin/login');
+  };
 
   return (
     <div className="min-h-screen flex dark" style={{ background: 'hsl(222, 47%, 6%)' }}>
@@ -41,7 +47,7 @@ const PlatformAdminLayout = () => {
           ))}
         </nav>
         <div className="absolute bottom-4 left-4 right-4">
-          <Button variant="ghost" size="sm" className="w-full justify-start" style={{ color: 'hsl(210, 15%, 50%)' }} onClick={signOut}>
+          <Button variant="ghost" size="sm" className="w-full justify-start" style={{ color: 'hsl(210, 15%, 50%)' }} onClick={handleLogout}>
             <LogOut className="h-4 w-4 mr-2" /> Logout
           </Button>
         </div>
