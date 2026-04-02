@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCompanyName } from '@/hooks/useCompanyName';
 import { Button } from '@/components/ui/button';
@@ -22,7 +22,13 @@ const BranchAdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { signOut, companyId } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const companyName = useCompanyName(companyId);
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/login');
+  };
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -50,7 +56,7 @@ const BranchAdminLayout = () => {
           ))}
         </nav>
         <div className="absolute bottom-4 left-4 right-4">
-          <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground/60" onClick={signOut}>
+          <Button variant="ghost" size="sm" className="w-full justify-start text-sidebar-foreground/60" onClick={handleLogout}>
             <LogOut className="h-4 w-4 mr-2" /> Logout
           </Button>
         </div>

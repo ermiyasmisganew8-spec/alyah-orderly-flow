@@ -2,15 +2,18 @@ import { useState } from 'react';
 import { useParams, useOutletContext } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useOrderTrackingRealtime } from '@/hooks/useOrderRealtime';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { ORDER_STATUS_LABELS } from '@/lib/constants';
-import { CheckCircle, Clock, ChefHat, UtensilsCrossed, Star, MessageSquare } from 'lucide-react';
+import { CheckCircle, Clock, ChefHat, UtensilsCrossed, Star, MessageSquare, LogIn } from 'lucide-react';
 
 interface OutletCtx {
   branchId: string;
@@ -27,11 +30,19 @@ const statusIcons: Record<string, React.ElementType> = {
 const CustomerOrderTracking = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const { branchId } = useOutletContext<OutletCtx>();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
 
   const [feedbackItem, setFeedbackItem] = useState<{ id: string; name: string } | null>(null);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
+
+  // Auth modal state
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [authForm, setAuthForm] = useState({ email: '', password: '', fullName: '' });
+  const [authLoading, setAuthLoading] = useState(false);
+  const [pendingFeedbackItem, setPendingFeedbackItem] = useState<{ id: string; name: string } | null>(null);
 
   const { data: order, refetch } = useQuery({
     queryKey: ['order', orderId],
@@ -65,6 +76,7 @@ const CustomerOrderTracking = () => {
         order_id: orderId!,
         rating,
         comment: comment || null,
+        customer_id: user!.id,
       });
       if (error) throw error;
     },
@@ -77,6 +89,51 @@ const CustomerOrderTracking = () => {
     },
     onError: () => toast.error('Failed to submit feedback'),
   });
+
+  const handleFeedbackClick = (item: { id: string; name: string }) => {
+    if (!user) {
+      setPendingFeedbackItem(item);
+      setShowAuthModal(true);
+      return;
+    }
+    setFeedbackItem(item);
+    setRating(5);
+    setComment('');
+  };
+
+  const handleAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthLoading(true);
+    try {
+      if (authMode === 'login') {
+        const { error } = await supabase.auth.signInWithPassword({ email: authForm.email, password: authForm.password });
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.auth.signUp({
+          email: authForm.email,
+          password: authForm.password,
+          options: { data: { full_name: authForm.fullName } },
+        });
+        if (error) throw error;
+        toast.success('Account created! You can now submit feedback.');
+      }
+      setShowAuthModal(false);
+      setAuthForm({ email: '', password: '', fullName: '' });
+      // Open the feedback modal for the pending item
+      if (pendingFeedbackItem) {
+        setTimeout(() => {
+          setFeedbackItem(pendingFeedbackItem);
+          setPendingFeedbackItem(null);
+          setRating(5);
+          setComment('');
+        }, 500);
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Authentication failed');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
 
   const handlePayment = async () => {
     if (!order) return;
@@ -159,11 +216,7 @@ const CustomerOrderTracking = () => {
                   size="sm"
                   className="h-7 text-xs"
                   disabled={hasFeedback}
-                  onClick={() => {
-                    setFeedbackItem({ id: item.menu_item_id, name: item.menu_items?.name || 'Item' });
-                    setRating(5);
-                    setComment('');
-                  }}
+                  onClick={() => handleFeedbackClick({ id: item.menu_item_id, name: item.menu_items?.name || 'Item' })}
                 >
                   {hasFeedback ? (
                     <><CheckCircle className="h-3 w-3 mr-1" /> Reviewed</>
@@ -188,6 +241,44 @@ const CustomerOrderTracking = () => {
         </Button>
       )}
 
+      {/* Auth Modal */}
+      <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <LogIn className="h-5 w-5" />
+              {authMode === 'login' ? 'Log In to Leave Feedback' : 'Sign Up to Leave Feedback'}
+            </DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleAuth} className="space-y-4">
+            {authMode === 'signup' && (
+              <div>
+                <Label>Full Name</Label>
+                <Input value={authForm.fullName} onChange={e => setAuthForm(f => ({ ...f, fullName: e.target.value }))} required />
+              </div>
+            )}
+            <div>
+              <Label>Email</Label>
+              <Input type="email" value={authForm.email} onChange={e => setAuthForm(f => ({ ...f, email: e.target.value }))} required />
+            </div>
+            <div>
+              <Label>Password</Label>
+              <Input type="password" value={authForm.password} onChange={e => setAuthForm(f => ({ ...f, password: e.target.value }))} required minLength={6} />
+            </div>
+            <Button type="submit" className="w-full" disabled={authLoading}>
+              {authLoading ? 'Please wait...' : authMode === 'login' ? 'Log In' : 'Sign Up'}
+            </Button>
+            <p className="text-center text-sm text-muted-foreground">
+              {authMode === 'login' ? (
+                <>Don't have an account? <button type="button" className="text-primary underline" onClick={() => setAuthMode('signup')}>Sign Up</button></>
+              ) : (
+                <>Already have an account? <button type="button" className="text-primary underline" onClick={() => setAuthMode('login')}>Log In</button></>
+              )}
+            </p>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       {/* Feedback Modal */}
       <Dialog open={!!feedbackItem} onOpenChange={() => setFeedbackItem(null)}>
         <DialogContent className="sm:max-w-md">
@@ -195,17 +286,10 @@ const CustomerOrderTracking = () => {
             <DialogTitle className="font-display">Rate {feedbackItem?.name}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            {/* Star Rating */}
             <div className="flex justify-center gap-2">
               {[1, 2, 3, 4, 5].map(star => (
-                <button
-                  key={star}
-                  onClick={() => setRating(star)}
-                  className="transition-transform hover:scale-110"
-                >
-                  <Star
-                    className={`h-8 w-8 ${star <= rating ? 'fill-primary text-primary' : 'text-muted-foreground'}`}
-                  />
+                <button key={star} onClick={() => setRating(star)} className="transition-transform hover:scale-110">
+                  <Star className={`h-8 w-8 ${star <= rating ? 'fill-primary text-primary' : 'text-muted-foreground'}`} />
                 </button>
               ))}
             </div>
