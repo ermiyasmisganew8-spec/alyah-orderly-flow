@@ -6,6 +6,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import NotFound from "./pages/NotFound.tsx";
 
+// Landing
+import LandingPage from "@/pages/LandingPage";
+
 // Customer pages
 import CustomerLayout from "@/components/customer/CustomerLayout";
 import CustomerHome from "@/pages/customer/CustomerHome";
@@ -48,10 +51,10 @@ import CompanySettings from "@/pages/company-admin/CompanySettings";
 import PlatformAdminLayout from "@/components/admin/PlatformAdminLayout";
 import PlatformDashboard from "@/pages/platform-admin/PlatformDashboard";
 import CompanyManagement from "@/pages/platform-admin/CompanyManagement";
+import CompanyRequests from "@/pages/platform-admin/CompanyRequests";
 import GlobalSettings from "@/pages/platform-admin/GlobalSettings";
 import SecurityLogs from "@/pages/platform-admin/SecurityLogs";
 import FinancialReports from "@/pages/platform-admin/FinancialReports";
-import AdminLogin from "@/components/auth/AdminLogin";
 
 const queryClient = new QueryClient();
 
@@ -63,8 +66,8 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
-            {/* Redirect root to Canoe customer page */}
-            <Route path="/" element={<Navigate to="/b/a1b2c3d4-e5f6-4890-abcd-ef1234567890/b2c3d4e5-f6a7-4901-bcde-f12345678901?table=1" replace />} />
+            {/* Public landing page */}
+            <Route path="/" element={<LandingPage />} />
 
             {/* Customer routes */}
             <Route path="/b/:companyId/:branchId" element={<CustomerLayout />}>
@@ -108,11 +111,11 @@ const App = () => (
               <Route path="settings" element={<CompanySettings />} />
             </Route>
 
-            {/* Platform Admin - separate login */}
-            <Route path="/platform-admin/login" element={<AdminLogin title="Platform Admin Login" expectedRole="platform_admin" redirectPath="/platform-admin" />} />
+            {/* Platform Admin */}
             <Route path="/platform-admin" element={<PlatformAdminLayout />}>
               <Route index element={<PlatformDashboard />} />
               <Route path="companies" element={<CompanyManagement />} />
+              <Route path="requests" element={<CompanyRequests />} />
               <Route path="settings" element={<GlobalSettings />} />
               <Route path="security" element={<SecurityLogs />} />
               <Route path="reports" element={<FinancialReports />} />

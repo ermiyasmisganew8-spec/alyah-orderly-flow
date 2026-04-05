@@ -1,17 +1,18 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 
 const ROLE_REDIRECTS: Record<string, string> = {
   staff: '/staff',
   branch_admin: '/branch-admin',
   company_admin: '/company-admin',
+  platform_admin: '/platform-admin',
 };
 
 const Login = () => {
@@ -19,7 +20,6 @@ const Login = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState('staff');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -28,8 +28,32 @@ const Login = () => {
     try {
       const { error } = await signIn(email, password);
       if (error) throw error;
+
+      // Fetch role from database
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Authentication failed');
+
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (!roleData?.role) {
+        await supabase.auth.signOut();
+        toast.error('Account not properly configured. Contact support.');
+        return;
+      }
+
+      const redirect = ROLE_REDIRECTS[roleData.role];
+      if (!redirect) {
+        await supabase.auth.signOut();
+        toast.error('Account not properly configured. Contact support.');
+        return;
+      }
+
       toast.success('Logged in!');
-      navigate(ROLE_REDIRECTS[role] || '/staff');
+      navigate(redirect);
     } catch (err: any) {
       toast.error(err.message || 'Login failed');
     } finally {
@@ -53,17 +77,6 @@ const Login = () => {
             <div>
               <Label htmlFor="password">Password</Label>
               <Input id="password" type="password" value={password} onChange={e => setPassword(e.target.value)} required />
-            </div>
-            <div>
-              <Label>Role</Label>
-              <Select value={role} onValueChange={setRole}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="staff">Staff</SelectItem>
-                  <SelectItem value="branch_admin">Branch Admin</SelectItem>
-                  <SelectItem value="company_admin">Company Admin</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'Logging in...' : 'Login'}
