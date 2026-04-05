@@ -23,7 +23,7 @@ const PlatformAdminLayout = () => {
 
   const handleLogout = async () => {
     await signOut();
-    navigate('/platform-admin/login');
+    navigate('/login');
   };
 
   return (

@@ -65,6 +65,13 @@ const AdminManagement = () => {
       if (data?.user_id) {
         setAdminCreds(prev => ({ ...prev, [data.user_id]: { email: form.email, password: form.password } }));
       }
+
+      // Send credential email
+      try {
+        await supabase.functions.invoke('send-credential-email', {
+          body: { to: form.email, name: form.full_name, email: form.email, password: form.password, role: 'Branch Admin' },
+        });
+      } catch { /* demo logging */ }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['branch-admins'] });
