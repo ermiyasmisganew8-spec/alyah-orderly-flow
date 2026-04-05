@@ -93,6 +93,48 @@ export type Database = {
           },
         ]
       }
+      company_requests: {
+        Row: {
+          branch_count: string
+          created_at: string
+          email: string
+          id: string
+          notes: string | null
+          owner_name: string
+          phone: string
+          preferred_plan: string
+          restaurant_name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          branch_count?: string
+          created_at?: string
+          email: string
+          id?: string
+          notes?: string | null
+          owner_name: string
+          phone: string
+          preferred_plan?: string
+          restaurant_name: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          branch_count?: string
+          created_at?: string
+          email?: string
+          id?: string
+          notes?: string | null
+          owner_name?: string
+          phone?: string
+          preferred_plan?: string
+          restaurant_name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       feedback: {
         Row: {
           comment: string | null

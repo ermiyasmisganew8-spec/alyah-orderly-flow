@@ -79,6 +79,13 @@ const CompanyManagement = () => {
             password: form.admin_password,
             companyName: form.name,
           });
+
+          // Send credential email
+          try {
+            await supabase.functions.invoke('send-credential-email', {
+              body: { to: form.admin_email, name: form.admin_name || form.admin_email, email: form.admin_email, password: form.admin_password, role: 'Company Admin' },
+            });
+          } catch { /* demo logging */ }
         }
       }
     },
