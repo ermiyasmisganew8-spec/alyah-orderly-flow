@@ -162,7 +162,7 @@ const CustomerOrderTracking = () => {
   const steps = ['pending', 'preparing', 'served', 'paid'];
   const currentStep = steps.indexOf(order.status);
   const StatusIcon = statusIcons[order.status] || Clock;
-  const hasFeedback = existingFeedback && existingFeedback.length > 0;
+  const reviewedItemIds = new Set((existingFeedback || []).map((f: any) => f.menu_item_id).filter(Boolean));
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
@@ -217,10 +217,10 @@ const CustomerOrderTracking = () => {
                   variant="outline"
                   size="sm"
                   className="h-7 text-xs"
-                  disabled={hasFeedback}
+                  disabled={reviewedItemIds.has(item.menu_item_id)}
                   onClick={() => handleFeedbackClick({ id: item.menu_item_id, name: item.menu_items?.name || 'Item' })}
                 >
-                  {hasFeedback ? (
+                  {reviewedItemIds.has(item.menu_item_id) ? (
                     <><CheckCircle className="h-3 w-3 mr-1" /> Reviewed</>
                   ) : (
                     <><MessageSquare className="h-3 w-3 mr-1" /> Feedback</>
