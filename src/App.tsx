@@ -45,6 +45,7 @@ import CompanyDashboard from "@/pages/company-admin/CompanyDashboard";
 import AdminManagement from "@/pages/company-admin/AdminManagement";
 import CompanyPermissions from "@/pages/company-admin/CompanyPermissions";
 import BranchManagement from "@/pages/company-admin/BranchManagement";
+import CompanyInfo from "@/pages/company-admin/CompanyInfo";
 import CompanySettings from "@/pages/company-admin/CompanySettings";
 
 // Platform Admin
@@ -108,6 +109,7 @@ const App = () => (
               <Route path="admins" element={<AdminManagement />} />
               <Route path="permissions" element={<CompanyPermissions />} />
               <Route path="branches" element={<BranchManagement />} />
+              <Route path="info" element={<CompanyInfo />} />
               <Route path="settings" element={<CompanySettings />} />
             </Route>
 
