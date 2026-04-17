@@ -72,12 +72,14 @@ const CustomerOrderTracking = () => {
 
   const submitFeedback = useMutation({
     mutationFn: async () => {
+      if (!feedbackItem) return;
       const { error } = await supabase.from('feedback').insert({
         order_id: orderId!,
+        menu_item_id: feedbackItem.id || null,
         rating,
         comment: comment || null,
         customer_id: user!.id,
-      });
+      } as any);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -87,7 +89,7 @@ const CustomerOrderTracking = () => {
       setRating(5);
       setComment('');
     },
-    onError: () => toast.error('Failed to submit feedback'),
+    onError: (e: any) => toast.error(e.message || 'Failed to submit feedback'),
   });
 
   const handleFeedbackClick = (item: { id: string; name: string }) => {
