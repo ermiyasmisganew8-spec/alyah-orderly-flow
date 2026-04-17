@@ -13,8 +13,10 @@ import { toast } from 'sonner';
 import {
   QrCode, Clock, ShieldCheck, BarChart3, Smartphone, Utensils,
   ChefHat, Building2, CreditCard, Megaphone, TrendingUp, Star,
-  Menu as MenuIcon, X, Check, ArrowRight, Play
+  Menu as MenuIcon, X, Check, ArrowRight, Play,
+  Facebook, Instagram, Linkedin, Mail, Phone, MapPin
 } from 'lucide-react';
+import heroImage from '@/assets/hero-restaurant.jpg';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -127,21 +129,31 @@ const LandingPage = () => {
         )}
       </header>
 
-      {/* Hero */}
-      <section className="py-16 sm:py-24 px-4 sm:px-6 max-w-7xl mx-auto text-center">
-        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-display font-bold text-foreground leading-tight mb-6">
-          Transform Your Restaurant with a <span className="text-gradient-primary">Smart Digital Menu</span>
-        </h1>
-        <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-          Increase table turnover, reduce order errors, and get real-time analytics — all in one SaaS platform.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button size="lg" onClick={() => scrollTo(formRef)}>
-            Request a Demo <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
-          <Button size="lg" variant="outline" onClick={() => setVideoModal(true)}>
-            <Play className="mr-2 h-4 w-4" /> Watch Demo
-          </Button>
+      {/* Hero with background image */}
+      <section className="relative overflow-hidden">
+        <img
+          src={heroImage}
+          alt="Authentic Ethiopian restaurant interior with traditional dishes"
+          width={1920}
+          height={1080}
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/55 to-black/75" />
+        <div className="relative py-20 sm:py-32 px-4 sm:px-6 max-w-5xl mx-auto text-center">
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-display font-bold text-white leading-tight mb-6 drop-shadow-lg">
+            Transform Your Restaurant with a <span className="text-orange-300">Smart Digital Menu</span>
+          </h1>
+          <p className="text-lg sm:text-xl text-gray-100 max-w-2xl mx-auto mb-10 drop-shadow">
+            Increase table turnover, reduce order errors, and get real-time analytics — all in one SaaS platform.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button size="lg" className="shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5" onClick={() => scrollTo(formRef)}>
+              Request a Demo <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+            <Button size="lg" variant="outline" className="bg-white/10 backdrop-blur text-white border-white/40 hover:bg-white/20 hover:text-white" onClick={() => setVideoModal(true)}>
+              <Play className="mr-2 h-4 w-4" /> Watch Demo
+            </Button>
+          </div>
         </div>
       </section>
 

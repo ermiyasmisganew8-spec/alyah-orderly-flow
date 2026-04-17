@@ -142,6 +142,7 @@ export type Database = {
           customer_id: string | null
           id: string
           is_reviewed: boolean
+          menu_item_id: string | null
           order_id: string
           rating: number
         }
@@ -151,6 +152,7 @@ export type Database = {
           customer_id?: string | null
           id?: string
           is_reviewed?: boolean
+          menu_item_id?: string | null
           order_id: string
           rating: number
         }
@@ -160,10 +162,18 @@ export type Database = {
           customer_id?: string | null
           id?: string
           is_reviewed?: boolean
+          menu_item_id?: string | null
           order_id?: string
           rating?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "feedback_menu_item_id_fkey"
+            columns: ["menu_item_id"]
+            isOneToOne: false
+            referencedRelation: "menu_items"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "feedback_order_id_fkey"
             columns: ["order_id"]
@@ -492,31 +502,46 @@ export type Database = {
       }
       restaurant_companies: {
         Row: {
+          about_story: string | null
           address: string | null
           contact_email: string | null
           created_at: string
           id: string
+          location: string | null
           name: string
+          opening_hours: Json | null
+          phone: string | null
           status: Database["public"]["Enums"]["entity_status"]
           updated_at: string
+          values_text: string | null
         }
         Insert: {
+          about_story?: string | null
           address?: string | null
           contact_email?: string | null
           created_at?: string
           id?: string
+          location?: string | null
           name: string
+          opening_hours?: Json | null
+          phone?: string | null
           status?: Database["public"]["Enums"]["entity_status"]
           updated_at?: string
+          values_text?: string | null
         }
         Update: {
+          about_story?: string | null
           address?: string | null
           contact_email?: string | null
           created_at?: string
           id?: string
+          location?: string | null
           name?: string
+          opening_hours?: Json | null
+          phone?: string | null
           status?: Database["public"]["Enums"]["entity_status"]
           updated_at?: string
+          values_text?: string | null
         }
         Relationships: []
       }

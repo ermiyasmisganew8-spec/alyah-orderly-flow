@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCompanyName } from '@/hooks/useCompanyName';
+import { useBranchName } from '@/hooks/useBranchName';
 import { Button } from '@/components/ui/button';
 import {
   LayoutDashboard, UtensilsCrossed, Tag, BarChart3, Users, MessageSquare, Settings, Menu, X, LogOut
@@ -20,10 +21,11 @@ const sidebarItems = [
 
 const BranchAdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { signOut, companyId } = useAuth();
+  const { signOut, companyId, branchId } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const companyName = useCompanyName(companyId);
+  const branchName = useBranchName(branchId);
 
   const handleLogout = async () => {
     await signOut();
@@ -36,7 +38,8 @@ const BranchAdminLayout = () => {
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static`}>
         <div className="p-4 border-b border-sidebar-border">
           <h1 className="font-display text-lg font-bold text-sidebar-primary">Branch Admin</h1>
-          <p className="text-xs text-sidebar-foreground/60">{companyName} Cafe and Restaurant</p>
+          <p className="text-xs text-sidebar-foreground/80 truncate">{companyName} Cafe and Restaurant</p>
+          <p className="text-xs text-sidebar-primary/80 truncate mt-0.5">— {branchName}</p>
         </div>
         <nav className="p-2 space-y-1">
           {sidebarItems.map(item => (
@@ -69,7 +72,7 @@ const BranchAdminLayout = () => {
           <button onClick={() => setSidebarOpen(!sidebarOpen)}>
             {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
-          <span className="ml-3 font-display font-semibold">Branch Admin</span>
+          <span className="ml-3 font-display font-semibold truncate">{companyName} — {branchName}</span>
         </header>
         <main className="p-4 md:p-6">
           <Outlet />

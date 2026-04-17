@@ -2,6 +2,7 @@ import { Outlet, useParams, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import CustomerNav from '@/components/customer/CustomerNav';
+import CustomerFooter from '@/components/customer/CustomerFooter';
 import { CartProvider } from '@/contexts/CartContext';
 
 const CustomerLayout = () => {
@@ -14,9 +15,9 @@ const CustomerLayout = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from('restaurant_companies')
-        .select('name')
+        .select('name, contact_email, phone, location, opening_hours, about_story, values_text')
         .eq('id', companyId!)
-        .single();
+        .maybeSingle();
       return data;
     },
     enabled: !!companyId,
@@ -31,17 +32,21 @@ const CustomerLayout = () => {
 
   return (
     <CartProvider>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background flex flex-col">
         <CustomerNav companyId={companyId} branchId={branchId} tableNumber={tableNumber} companyName={companyName} />
-        <Outlet context={{ companyId, branchId, tableNumber, companyName }} />
-        <footer className="border-t bg-card py-8 mt-12">
-          <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-            <p className="font-display text-lg font-semibold text-foreground mb-2">{companyName} Cafe and Restaurant</p>
-            <p>123 in front of poly campus, Bahir Dar</p>
-            <p className="mt-1">Open Daily: 7:00 AM – 10:00 PM</p>
-            <p className="mt-4 text-xs">Powered by Alyah Menu</p>
-          </div>
-        </footer>
+        <div className="flex-1">
+          <Outlet context={{ companyId, branchId, tableNumber, companyName, company }} />
+        </div>
+        <CustomerFooter
+          companyId={companyId}
+          branchId={branchId}
+          tableNumber={tableNumber}
+          companyName={companyName}
+          phone={company?.phone}
+          location={company?.location}
+          email={company?.contact_email}
+          openingHours={company?.opening_hours as any}
+        />
       </div>
     </CartProvider>
   );
