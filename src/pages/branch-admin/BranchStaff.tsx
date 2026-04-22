@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { Plus, UserX } from 'lucide-react';
 
@@ -21,7 +22,7 @@ const BranchStaff = () => {
   const { branchId, companyId } = useAuth();
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
-  const [form, setForm] = useState({ full_name: '', email: '', phone: '', password: '' });
+  const [form, setForm] = useState({ full_name: '', email: '', phone: '', password: '', staff_position: 'waiter' });
   const [staffCreds, setStaffCreds] = useState<Record<string, StaffCred>>({});
 
   const { data: staffRoles } = useQuery({
@@ -48,6 +49,7 @@ const BranchStaff = () => {
           role: 'staff',
           branch_id: branchId,
           company_id: companyId,
+          staff_position: form.staff_position,
         },
       });
       if (error) throw error;
@@ -74,7 +76,7 @@ const BranchStaff = () => {
       queryClient.invalidateQueries({ queryKey: ['branch-staff'] });
       toast.success('Staff member added!');
       setIsOpen(false);
-      setForm({ full_name: '', email: '', phone: '', password: '' });
+      setForm({ full_name: '', email: '', phone: '', password: '', staff_position: 'waiter' });
     },
     onError: (err: any) => toast.error(err.message || 'Failed to add staff'),
   });
@@ -105,6 +107,18 @@ const BranchStaff = () => {
                 <div><Label>Full Name</Label><Input value={form.full_name} onChange={e => setForm(f => ({ ...f, full_name: e.target.value }))} required /></div>
                 <div><Label>Email</Label><Input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required /></div>
                 <div><Label>Phone</Label><Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} /></div>
+                <div>
+                  <Label>Position</Label>
+                  <Select value={form.staff_position} onValueChange={v => setForm(f => ({ ...f, staff_position: v }))}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="waiter">Waiter</SelectItem>
+                      <SelectItem value="cashier">Cashier</SelectItem>
+                      <SelectItem value="manager">Manager</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground mt-1">Waiters see only their tips; cashiers/managers see the orders dashboard.</p>
+                </div>
                 <div><Label>Password</Label><Input type="password" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} required minLength={6} /></div>
                 <Button type="submit" className="w-full" disabled={addStaff.isPending}>{addStaff.isPending ? 'Adding...' : 'Add Staff'}</Button>
               </form>
@@ -120,6 +134,7 @@ const BranchStaff = () => {
                   <tr className="border-b text-left text-muted-foreground bg-muted/50">
                     <th className="p-3">Name</th>
                     <th className="p-3">Email</th>
+                    <th className="p-3">Position</th>
                     <th className="p-3">Phone</th>
                     <th className="p-3">Status</th>
                     <th className="p-3">Actions</th>
@@ -132,6 +147,7 @@ const BranchStaff = () => {
                       <tr key={sr.id} className="border-b last:border-0 hover:bg-muted/30">
                         <td className="p-3 font-medium">{sr.profiles?.full_name}</td>
                         <td className="p-3 text-muted-foreground">{sr.profiles?.email}</td>
+                        <td className="p-3 capitalize text-muted-foreground">{sr.staff_position || 'waiter'}</td>
                         <td className="p-3 text-muted-foreground">{sr.profiles?.phone || '—'}</td>
                         <td className="p-3">
                           <Badge variant={sr.profiles?.is_active ? 'default' : 'secondary'}>
@@ -156,7 +172,7 @@ const BranchStaff = () => {
                     return row;
                   })}
                   {(!staffRoles || staffRoles.length === 0) && (
-                    <tr><td colSpan={5} className="p-6 text-center text-muted-foreground">No staff members yet</td></tr>
+                    <tr><td colSpan={6} className="p-6 text-center text-muted-foreground">No staff members yet</td></tr>
                   )}
                 </tbody>
               </table>

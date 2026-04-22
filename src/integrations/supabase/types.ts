@@ -145,6 +145,8 @@ export type Database = {
           menu_item_id: string | null
           order_id: string
           rating: number
+          staff_id: string | null
+          tip_amount: number
         }
         Insert: {
           comment?: string | null
@@ -155,6 +157,8 @@ export type Database = {
           menu_item_id?: string | null
           order_id: string
           rating: number
+          staff_id?: string | null
+          tip_amount?: number
         }
         Update: {
           comment?: string | null
@@ -165,6 +169,8 @@ export type Database = {
           menu_item_id?: string | null
           order_id?: string
           rating?: number
+          staff_id?: string | null
+          tip_amount?: number
         }
         Relationships: [
           {
@@ -298,6 +304,7 @@ export type Database = {
           customer_id: string | null
           id: string
           notes: string | null
+          staff_id: string | null
           status: Database["public"]["Enums"]["order_status"]
           table_number: number
           total_amount: number
@@ -309,6 +316,7 @@ export type Database = {
           customer_id?: string | null
           id?: string
           notes?: string | null
+          staff_id?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           table_number: number
           total_amount?: number
@@ -320,6 +328,7 @@ export type Database = {
           customer_id?: string | null
           id?: string
           notes?: string | null
+          staff_id?: string | null
           status?: Database["public"]["Enums"]["order_status"]
           table_number?: number
           total_amount?: number
@@ -551,6 +560,7 @@ export type Database = {
           company_id: string | null
           id: string
           role: Database["public"]["Enums"]["app_role"]
+          staff_position: string | null
           user_id: string
         }
         Insert: {
@@ -558,6 +568,7 @@ export type Database = {
           company_id?: string | null
           id?: string
           role: Database["public"]["Enums"]["app_role"]
+          staff_position?: string | null
           user_id: string
         }
         Update: {
@@ -565,6 +576,7 @@ export type Database = {
           company_id?: string | null
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          staff_position?: string | null
           user_id?: string
         }
         Relationships: [
@@ -591,6 +603,7 @@ export type Database = {
     Functions: {
       get_user_branch_id: { Args: { _user_id: string }; Returns: string }
       get_user_company_id: { Args: { _user_id: string }; Returns: string }
+      get_user_staff_position: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

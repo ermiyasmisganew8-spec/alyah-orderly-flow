@@ -35,7 +35,7 @@ const Login = () => {
 
       const { data: roleData } = await supabase
         .from('user_roles')
-        .select('role')
+        .select('role, staff_position')
         .eq('user_id', user.id)
         .maybeSingle();
 
@@ -45,7 +45,11 @@ const Login = () => {
         return;
       }
 
-      const redirect = ROLE_REDIRECTS[roleData.role];
+      let redirect = ROLE_REDIRECTS[roleData.role];
+      // Waiters land on the tips page; cashiers/managers see the orders dashboard
+      if (roleData.role === 'staff' && (roleData as any).staff_position === 'waiter') {
+        redirect = '/staff/tips';
+      }
       if (!redirect) {
         await supabase.auth.signOut();
         toast.error('Account not properly configured. Contact support.');

@@ -27,6 +27,8 @@ import Login from "@/pages/Login";
 import StaffLayout from "@/components/staff/StaffLayout";
 import StaffDashboardContent from "@/pages/staff/StaffDashboardContent";
 import StaffSettings from "@/pages/staff/StaffSettings";
+import StaffTips from "@/pages/staff/StaffTips";
+import StaffTipsOverview from "@/pages/staff/StaffTipsOverview";
 
 // Branch Admin
 import BranchAdminLayout from "@/components/admin/BranchAdminLayout";
@@ -88,6 +90,8 @@ const App = () => (
             {/* Staff with sidebar layout */}
             <Route path="/staff" element={<StaffLayout />}>
               <Route index element={<StaffDashboardContent />} />
+              <Route path="tips" element={<StaffTips />} />
+              <Route path="tips-overview" element={<StaffTipsOverview />} />
               <Route path="settings" element={<StaffSettings />} />
             </Route>
 

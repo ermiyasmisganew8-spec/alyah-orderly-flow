@@ -1,15 +1,18 @@
+import { useState, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Star, UtensilsCrossed } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Star, UtensilsCrossed, Coins } from 'lucide-react';
 import { toast } from 'sonner';
 
 const BranchFeedback = () => {
   const { branchId } = useAuth();
   const queryClient = useQueryClient();
+  const [staffFilter, setStaffFilter] = useState<string>('all');
 
   const { data: feedbackList } = useQuery({
     queryKey: ['feedback', branchId],
@@ -24,6 +27,28 @@ const BranchFeedback = () => {
     enabled: !!branchId,
   });
 
+  // Resolve staff names for filter dropdown and display
+  const staffIds = useMemo(
+    () => Array.from(new Set((feedbackList || []).map((f: any) => f.staff_id).filter(Boolean))),
+    [feedbackList]
+  );
+
+  const { data: staffProfiles } = useQuery({
+    queryKey: ['staff-profiles', staffIds.join(',')],
+    queryFn: async () => {
+      if (staffIds.length === 0) return [];
+      const { data } = await supabase.from('profiles').select('user_id, full_name, email').in('user_id', staffIds);
+      return data || [];
+    },
+    enabled: staffIds.length > 0,
+  });
+
+  const staffName = (id: string | null) => {
+    if (!id) return '—';
+    const p = staffProfiles?.find((x: any) => x.user_id === id);
+    return p?.full_name || p?.email || id.slice(0, 8);
+  };
+
   const markReviewed = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase.from('feedback').update({ is_reviewed: true }).eq('id', id);
@@ -35,25 +60,50 @@ const BranchFeedback = () => {
     },
   });
 
-  const avgRating = feedbackList?.length
-    ? (feedbackList.reduce((s, f: any) => s + f.rating, 0) / feedbackList.length).toFixed(1)
+  const filtered = (feedbackList || []).filter((f: any) =>
+    staffFilter === 'all' ? true : staffFilter === 'unassigned' ? !f.staff_id : f.staff_id === staffFilter
+  );
+
+  const avgRating = filtered.length
+    ? (filtered.reduce((s, f: any) => s + f.rating, 0) / filtered.length).toFixed(1)
     : '0';
+  const totalTips = filtered.reduce((s, f: any) => s + Number(f.tip_amount || 0), 0);
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <h1 className="text-2xl font-display font-bold">Feedback</h1>
-        <div className="flex items-center gap-2">
-          <Star className="h-5 w-5 text-gold fill-current" />
-          <span className="text-xl font-bold">{avgRating}</span>
-          <span className="text-sm text-muted-foreground">({feedbackList?.length || 0} reviews)</span>
+        <div className="flex items-center gap-4 flex-wrap">
+          <Select value={staffFilter} onValueChange={setStaffFilter}>
+            <SelectTrigger className="w-56">
+              <SelectValue placeholder="Filter by staff" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All staff</SelectItem>
+              <SelectItem value="unassigned">Unassigned</SelectItem>
+              {staffIds.map((id: any) => (
+                <SelectItem key={id} value={id}>{staffName(id)}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <div className="flex items-center gap-2">
+            <Star className="h-5 w-5 text-gold fill-current" />
+            <span className="text-xl font-bold">{avgRating}</span>
+            <span className="text-sm text-muted-foreground">({filtered.length})</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Coins className="h-5 w-5 text-primary" />
+            <span className="text-xl font-bold">{totalTips.toFixed(2)}</span>
+            <span className="text-sm text-muted-foreground">ETB tips</span>
+          </div>
         </div>
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">
-        {feedbackList?.map((f: any) => {
+        {filtered.map((f: any) => {
           const itemName = f.menu_items?.name || (f.menu_item_id ? 'Deleted item' : 'Unknown');
           const customerName = f.profiles?.full_name || f.profiles?.email || 'Anonymous';
+          const tip = Number(f.tip_amount || 0);
           return (
             <Card key={f.id} className="shadow-card border-0">
               <CardContent className="p-4">
@@ -67,6 +117,9 @@ const BranchFeedback = () => {
                       by {customerName}
                       {f.orders?.table_number ? ` • Table ${f.orders.table_number}` : ''}
                     </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      Waiter: {staffName(f.staff_id)}
+                    </p>
                   </div>
                   <span className="text-xs text-muted-foreground shrink-0">
                     {new Date(f.created_at).toLocaleDateString()}
@@ -78,7 +131,15 @@ const BranchFeedback = () => {
                   ))}
                 </div>
                 {f.comment && <p className="text-sm text-muted-foreground mb-3 italic">"{f.comment}"</p>}
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-2">
+                    {tip > 0 && (
+                      <Badge variant="secondary" className="gap-1">
+                        <Coins className="h-3 w-3" />
+                        {tip.toFixed(2)} ETB tip
+                      </Badge>
+                    )}
+                  </div>
                   {f.is_reviewed ? (
                     <Badge variant="secondary">Reviewed</Badge>
                   ) : (
@@ -91,7 +152,7 @@ const BranchFeedback = () => {
             </Card>
           );
         })}
-        {(!feedbackList || feedbackList.length === 0) && (
+        {filtered.length === 0 && (
           <Card className="md:col-span-2 shadow-card border-0">
             <CardContent className="p-12 text-center text-muted-foreground">
               <Star className="h-10 w-10 mx-auto mb-3 opacity-40" />

@@ -1,28 +1,50 @@
 import { Outlet, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCompanyName } from '@/hooks/useCompanyName';
+import { supabase } from '@/integrations/supabase/client';
 import { NavLink } from '@/components/NavLink';
-import { ChefHat, Settings, LogOut, LayoutDashboard } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ChefHat, Settings, LogOut, LayoutDashboard, Coins } from 'lucide-react';
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger,
 } from '@/components/ui/sidebar';
 
 const StaffLayout = () => {
-  const { signOut, companyId } = useAuth();
+  const { signOut, companyId, user } = useAuth();
   const navigate = useNavigate();
   const companyName = useCompanyName(companyId);
+
+  const { data: position } = useQuery({
+    queryKey: ['staff-position', user?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('user_roles')
+        .select('staff_position')
+        .eq('user_id', user!.id)
+        .maybeSingle();
+      return (data as any)?.staff_position ?? 'waiter';
+    },
+    enabled: !!user,
+  });
 
   const handleLogout = async () => {
     await signOut();
     navigate('/login');
   };
 
-  const items = [
-    { title: 'Dashboard', url: '/staff', icon: LayoutDashboard },
-    { title: 'Settings', url: '/staff/settings', icon: Settings },
-  ];
+  const isWaiter = position === 'waiter';
+
+  const items = isWaiter
+    ? [
+        { title: 'My Tips', url: '/staff/tips', icon: Coins },
+        { title: 'Settings', url: '/staff/settings', icon: Settings },
+      ]
+    : [
+        { title: 'Dashboard', url: '/staff', icon: LayoutDashboard },
+        { title: 'Tips Overview', url: '/staff/tips-overview', icon: Coins },
+        { title: 'Settings', url: '/staff/settings', icon: Settings },
+      ];
 
   return (
     <SidebarProvider>
