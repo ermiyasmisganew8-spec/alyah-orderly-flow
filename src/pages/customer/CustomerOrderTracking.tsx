@@ -37,6 +37,7 @@ const CustomerOrderTracking = () => {
   const [feedbackItem, setFeedbackItem] = useState<{ id: string; name: string } | null>(null);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
+  const [tipAmount, setTipAmount] = useState('');
 
   // Auth modal state
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -74,12 +75,16 @@ const CustomerOrderTracking = () => {
   const submitFeedback = useMutation({
     mutationFn: async () => {
       if (!feedbackItem) return;
+      const tipNum = parseFloat(tipAmount);
+      const tip = isNaN(tipNum) || tipNum < 0 ? 0 : tipNum;
       const { error } = await supabase.from('feedback').insert({
         order_id: orderId!,
         menu_item_id: feedbackItem.id || null,
         rating,
         comment: comment || null,
         customer_id: user!.id,
+        tip_amount: tip,
+        staff_id: (order as any)?.staff_id ?? null,
       } as any);
       if (error) throw error;
     },
@@ -89,6 +94,7 @@ const CustomerOrderTracking = () => {
       setFeedbackItem(null);
       setRating(5);
       setComment('');
+      setTipAmount('');
     },
     onError: (e: any) => toast.error(e.message || 'Failed to submit feedback'),
   });
@@ -102,6 +108,7 @@ const CustomerOrderTracking = () => {
     setFeedbackItem(item);
     setRating(5);
     setComment('');
+    setTipAmount('');
   };
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -129,6 +136,7 @@ const CustomerOrderTracking = () => {
           setPendingFeedbackItem(null);
           setRating(5);
           setComment('');
+          setTipAmount('');
         }, 500);
       }
     } catch (err: any) {
@@ -307,6 +315,21 @@ const CustomerOrderTracking = () => {
               onChange={e => setComment(e.target.value)}
               rows={3}
             />
+            <div>
+              <Label htmlFor="tip" className="text-sm">Optional Tip (ETB)</Label>
+              <Input
+                id="tip"
+                type="number"
+                step="any"
+                min="0"
+                placeholder="0.00"
+                value={tipAmount}
+                onChange={e => setTipAmount(e.target.value)}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Extra tip for the waitress (record only — pay in cash)
+              </p>
+            </div>
             <Button
               className="w-full"
               onClick={() => submitFeedback.mutate()}
