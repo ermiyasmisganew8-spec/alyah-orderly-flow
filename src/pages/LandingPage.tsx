@@ -333,37 +333,43 @@ const LandingPage = () => {
       </section>
 
       {/* Footer */}
-      <footer ref={contactRef} className="py-12 px-4 sm:px-6 bg-sidebar-background text-sidebar-foreground">
+      <footer ref={contactRef} className="py-12 px-4 sm:px-6 bg-gray-900 text-gray-300">
         <div className="max-w-7xl mx-auto grid sm:grid-cols-4 gap-8">
           <div>
-            <span className="font-display text-lg font-bold text-primary">Alyah Menu</span>
-            <p className="text-sm mt-2 opacity-70">Smart digital menu platform for Ethiopian restaurants.</p>
+            <span className="font-display text-lg font-bold text-orange-300">Alyah Menu</span>
+            <p className="text-sm mt-2 text-gray-400">Smart digital menu platform for Ethiopian restaurants.</p>
           </div>
           <div>
-            <h4 className="font-semibold text-sm mb-3">Quick Links</h4>
-            <div className="space-y-2 text-sm opacity-70">
-              <button onClick={() => scrollTo(featuresRef)} className="block hover:opacity-100">Features</button>
-              <button onClick={() => scrollTo(pricingRef)} className="block hover:opacity-100">Pricing</button>
-              <button onClick={() => scrollTo(formRef)} className="block hover:opacity-100">Request Access</button>
+            <h4 className="font-semibold text-sm mb-3 text-white">Quick Links</h4>
+            <div className="space-y-2 text-sm">
+              <button onClick={() => scrollTo(featuresRef)} className="block text-gray-400 hover:text-white transition-colors">Features</button>
+              <button onClick={() => scrollTo(pricingRef)} className="block text-gray-400 hover:text-white transition-colors">Pricing</button>
+              <button onClick={() => scrollTo(formRef)} className="block text-gray-400 hover:text-white transition-colors">Request Access</button>
             </div>
           </div>
           <div>
-            <h4 className="font-semibold text-sm mb-3">Legal</h4>
-            <div className="space-y-2 text-sm opacity-70">
+            <h4 className="font-semibold text-sm mb-3 text-white">Legal</h4>
+            <div className="space-y-2 text-sm text-gray-400">
               <p>Privacy Policy</p>
               <p>Terms of Service</p>
             </div>
           </div>
           <div>
-            <h4 className="font-semibold text-sm mb-3">Contact</h4>
-            <div className="space-y-2 text-sm opacity-70">
-              <p>info@alyahmenu.com</p>
-              <p>+251 911 123 456</p>
+            <h4 className="font-semibold text-sm mb-3 text-white">Contact</h4>
+            <div className="space-y-2 text-sm text-gray-400">
+              <p className="flex items-center gap-2"><Mail className="h-4 w-4" /> info@alyahmenu.com</p>
+              <p className="flex items-center gap-2"><Phone className="h-4 w-4" /> +251 911 123 456</p>
+              <p className="flex items-center gap-2"><MapPin className="h-4 w-4" /> Addis Ababa, Ethiopia</p>
             </div>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto mt-8 pt-6 border-t border-sidebar-border text-center text-xs opacity-50">
-          © {new Date().getFullYear()} Alyah Menu. All rights reserved.
+        <div className="max-w-7xl mx-auto mt-8 pt-6 border-t border-gray-700 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-gray-400">
+          <span>© {new Date().getFullYear()} Alyah Menu. All rights reserved.</span>
+          <div className="flex gap-3">
+            <a href="#" aria-label="Facebook" className="w-8 h-8 rounded-full bg-gray-800 hover:bg-orange-300 hover:text-gray-900 flex items-center justify-center transition-colors"><Facebook className="h-4 w-4" /></a>
+            <a href="#" aria-label="Instagram" className="w-8 h-8 rounded-full bg-gray-800 hover:bg-orange-300 hover:text-gray-900 flex items-center justify-center transition-colors"><Instagram className="h-4 w-4" /></a>
+            <a href="#" aria-label="LinkedIn" className="w-8 h-8 rounded-full bg-gray-800 hover:bg-orange-300 hover:text-gray-900 flex items-center justify-center transition-colors"><Linkedin className="h-4 w-4" /></a>
+          </div>
         </div>
       </footer>
     </div>
