@@ -26,7 +26,7 @@ export const clearStoredActiveOrder = (branchId: string) => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(map));
 };
 
-const ACTIVE_STATUSES = ['pending', 'preparing'];
+const ACTIVE_STATUSES = ['pending', 'preparing'] as const;
 
 /**
  * Returns the active order id for the current customer at this branch, if any.
