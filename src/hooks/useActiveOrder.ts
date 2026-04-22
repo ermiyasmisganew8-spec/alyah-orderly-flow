@@ -63,7 +63,7 @@ export const useActiveOrder = (branchId: string | undefined) => {
         .eq('id', stored)
         .maybeSingle();
 
-      if (!data || !ACTIVE_STATUSES.includes(data.status)) {
+      if (!data || !(ACTIVE_STATUSES as readonly string[]).includes(data.status)) {
         clearStoredActiveOrder(branchId);
         return null;
       }
