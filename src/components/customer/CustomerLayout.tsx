@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import CustomerNav from '@/components/customer/CustomerNav';
 import CustomerFooter from '@/components/customer/CustomerFooter';
+import ActiveOrderBanner from '@/components/customer/ActiveOrderBanner';
 import { CartProvider } from '@/contexts/CartContext';
 
 const CustomerLayout = () => {
@@ -34,6 +35,7 @@ const CustomerLayout = () => {
     <CartProvider>
       <div className="min-h-screen bg-background flex flex-col">
         <CustomerNav companyId={companyId} branchId={branchId} tableNumber={tableNumber} companyName={companyName} />
+        <ActiveOrderBanner companyId={companyId} branchId={branchId} tableNumber={tableNumber} />
         <div className="flex-1">
           <Outlet context={{ companyId, branchId, tableNumber, companyName, company }} />
         </div>

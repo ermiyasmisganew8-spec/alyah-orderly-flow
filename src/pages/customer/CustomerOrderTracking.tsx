@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { toast } from 'sonner';
 import { ORDER_STATUS_LABELS } from '@/lib/constants';
 import { CheckCircle, Clock, ChefHat, UtensilsCrossed, Star, MessageSquare, LogIn } from 'lucide-react';
+import { clearStoredActiveOrder } from '@/hooks/useActiveOrder';
 
 interface OutletCtx {
   branchId: string;
@@ -148,6 +149,8 @@ const CustomerOrderTracking = () => {
     });
     if (!payError) {
       await supabase.from('orders').update({ status: 'paid' as const }).eq('id', order.id);
+      clearStoredActiveOrder(order.branch_id);
+      queryClient.invalidateQueries({ queryKey: ['active-order', order.branch_id] });
       toast.success('Payment successful!');
       refetch();
     } else {

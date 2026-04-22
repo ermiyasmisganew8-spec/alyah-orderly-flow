@@ -1,11 +1,14 @@
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Minus, Plus, Trash2, ShoppingCart } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useState } from 'react';
+import { setStoredActiveOrder } from '@/hooks/useActiveOrder';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface OutletCtx {
   companyId: string;
@@ -16,13 +19,40 @@ interface OutletCtx {
 const CustomerCart = () => {
   const { companyId, branchId, tableNumber } = useOutletContext<OutletCtx>();
   const { items, updateQuantity, removeItem, clearCart, totalPrice } = useCart();
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [placing, setPlacing] = useState(false);
 
   const handlePlaceOrder = async () => {
     if (items.length === 0) return;
     setPlacing(true);
     try {
+      // Table lock check: prevent new order if table is already occupied
+      const { data: existing, error: checkError } = await supabase
+        .from('orders')
+        .select('id, customer_id, status')
+        .eq('branch_id', branchId)
+        .eq('table_number', tableNumber)
+        .in('status', ['pending', 'preparing'])
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (checkError) throw checkError;
+
+      if (existing) {
+        // If this customer owns the active order, take them to it instead
+        const ownsOrder = user && existing.customer_id === user.id;
+        if (ownsOrder) {
+          toast.info('You already have an active order at this table.');
+          navigate(`/b/${companyId}/${branchId}/order/${existing.id}?table=${tableNumber}`);
+          return;
+        }
+        toast.error('This table is currently occupied. Please wait until the current order is completed or ask staff for assistance.');
+        return;
+      }
+
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
@@ -30,6 +60,7 @@ const CustomerCart = () => {
           table_number: tableNumber,
           total_amount: totalPrice,
           status: 'pending',
+          customer_id: user?.id ?? null,
         })
         .select()
         .single();
@@ -46,6 +77,10 @@ const CustomerCart = () => {
 
       const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
       if (itemsError) throw itemsError;
+
+      // Remember active order for guests + logged-in users so the banner can show on other pages
+      setStoredActiveOrder(branchId, order.id);
+      queryClient.invalidateQueries({ queryKey: ['active-order', branchId] });
 
       clearCart();
       toast.success('Order placed successfully!');

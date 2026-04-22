@@ -73,6 +73,20 @@ const StaffDashboardContent = () => {
         {order.status === 'preparing' && (
           <Button size="sm" className="w-full" onClick={() => updateStatus.mutate({ orderId: order.id, status: 'served' })}>Mark Served</Button>
         )}
+        {order.status !== 'paid' && order.status !== 'cancelled' && (
+          <Button
+            size="sm"
+            variant="outline"
+            className="w-full mt-2 text-destructive hover:text-destructive"
+            onClick={() => {
+              if (confirm(`Free table ${order.table_number}? This cancels the order so a new customer can order.`)) {
+                updateStatus.mutate({ orderId: order.id, status: 'cancelled' });
+              }
+            }}
+          >
+            Free Table
+          </Button>
+        )}
       </CardContent>
     </Card>
   );
