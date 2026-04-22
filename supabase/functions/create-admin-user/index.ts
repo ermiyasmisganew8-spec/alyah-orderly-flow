@@ -48,7 +48,7 @@ Deno.serve(async (req) => {
       return json(200, { error: 'Invalid JSON body' });
     }
 
-    const { email, password, full_name, role, company_id, branch_id } = body || {};
+    const { email, password, full_name, role, company_id, branch_id, staff_position } = body || {};
 
     if (!email || !password || !role) {
       return json(200, { error: 'Missing required fields: email, password, role' });
@@ -111,27 +111,24 @@ Deno.serve(async (req) => {
     }
 
     // Upsert role assignment (avoid duplicate-key errors on retries)
+    const roleRow: Record<string, unknown> = {
+      user_id: userId,
+      role,
+      company_id: company_id || null,
+      branch_id: branch_id || null,
+    };
+    if (role === 'staff') {
+      roleRow.staff_position = staff_position || 'waiter';
+    }
+
     const { error: roleError } = await adminClient
       .from('user_roles')
-      .upsert(
-        {
-          user_id: userId,
-          role,
-          company_id: company_id || null,
-          branch_id: branch_id || null,
-        },
-        { onConflict: 'user_id,role' },
-      );
+      .upsert(roleRow, { onConflict: 'user_id,role' });
 
     if (roleError) {
       // Fallback: delete then insert
       await adminClient.from('user_roles').delete().eq('user_id', userId).eq('role', role);
-      const { error: insErr } = await adminClient.from('user_roles').insert({
-        user_id: userId,
-        role,
-        company_id: company_id || null,
-        branch_id: branch_id || null,
-      });
+      const { error: insErr } = await adminClient.from('user_roles').insert(roleRow);
       if (insErr) {
         console.error('role assignment failed:', insErr.message);
         return json(200, { error: `Role assignment failed: ${insErr.message}` });
