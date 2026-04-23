@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -30,13 +30,33 @@ const BranchStaff = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from('user_roles')
-        .select('*, profiles!inner(full_name, email, phone, is_active)')
+        .select('*')
         .eq('branch_id', branchId!)
         .eq('role', 'staff');
       return data || [];
     },
     enabled: !!branchId,
   });
+
+  const userIds = useMemo(
+    () => (staffRoles || []).map((r: any) => r.user_id).filter(Boolean),
+    [staffRoles]
+  );
+
+  const { data: staffProfiles } = useQuery({
+    queryKey: ['branch-staff-profiles', userIds.join(',')],
+    queryFn: async () => {
+      if (userIds.length === 0) return [];
+      const { data } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, email, phone, is_active')
+        .in('user_id', userIds);
+      return data || [];
+    },
+    enabled: userIds.length > 0,
+  });
+
+  const profileFor = (uid: string) => staffProfiles?.find((p: any) => p.user_id === uid);
 
   const addStaff = useMutation({
     mutationFn: async () => {
@@ -143,19 +163,20 @@ const BranchStaff = () => {
                 <tbody>
                   {staffRoles?.map((sr: any) => {
                     const cred = staffCreds[sr.user_id];
+                    const profile = profileFor(sr.user_id);
                     const row = (
                       <tr key={sr.id} className="border-b last:border-0 hover:bg-muted/30">
-                        <td className="p-3 font-medium">{sr.profiles?.full_name}</td>
-                        <td className="p-3 text-muted-foreground">{sr.profiles?.email}</td>
+                        <td className="p-3 font-medium">{profile?.full_name || '—'}</td>
+                        <td className="p-3 text-muted-foreground">{profile?.email || '—'}</td>
                         <td className="p-3 capitalize text-muted-foreground">{sr.staff_position || 'waiter'}</td>
-                        <td className="p-3 text-muted-foreground">{sr.profiles?.phone || '—'}</td>
+                        <td className="p-3 text-muted-foreground">{profile?.phone || '—'}</td>
                         <td className="p-3">
-                          <Badge variant={sr.profiles?.is_active ? 'default' : 'secondary'}>
-                            {sr.profiles?.is_active ? 'Active' : 'Inactive'}
+                          <Badge variant={profile?.is_active ? 'default' : 'secondary'}>
+                            {profile?.is_active ? 'Active' : 'Inactive'}
                           </Badge>
                         </td>
                         <td className="p-3">
-                          <Button variant="ghost" size="sm" onClick={() => toggleActive.mutate({ userId: sr.user_id, isActive: sr.profiles?.is_active })}>
+                          <Button variant="ghost" size="sm" onClick={() => toggleActive.mutate({ userId: sr.user_id, isActive: !!profile?.is_active })}>
                             <UserX className="h-3 w-3" />
                           </Button>
                         </td>
