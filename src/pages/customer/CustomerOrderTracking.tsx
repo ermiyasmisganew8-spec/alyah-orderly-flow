@@ -153,23 +153,57 @@ const CustomerOrderTracking = () => {
     }
   };
 
-  const handlePayment = async () => {
+  const computeTip = (subtotal: number) => {
+    if (payTipPreset === 'custom') {
+      const v = parseFloat(payTipCustom);
+      return isNaN(v) || v < 0 ? 0 : v;
+    }
+    const pct = parseInt(payTipPreset, 10);
+    return Math.round((subtotal * pct) / 100 * 100) / 100;
+  };
+
+  const handleConfirmPayment = async () => {
     if (!order) return;
-    const { error: payError } = await supabase.from('payments').insert({
-      order_id: order.id,
-      amount: order.total_amount,
-      method: 'cash',
-      status: 'completed',
-      transaction_ref: `PAY-${Date.now()}`,
-    });
-    if (!payError) {
+    setPaying(true);
+    try {
+      const subtotal = Number(order.total_amount);
+      const tip = computeTip(subtotal);
+      const total = subtotal + tip;
+      const methodLabel = payMethod === 'cbe' ? 'CBE Birr' : payMethod === 'telebirr' ? 'Telebirr' : 'Cash';
+
+      const { error: payError } = await supabase.from('payments').insert({
+        order_id: order.id,
+        amount: total,
+        method: methodLabel,
+        status: 'completed',
+        transaction_ref: `PAY-${Date.now()}`,
+        tip_amount: tip,
+        staff_id: (order as any).staff_id ?? null,
+      } as any);
+      if (payError) throw payError;
+
+      // Record the tip as a feedback row tied to the assigned waiter so it shows in /staff/tips
+      if (tip > 0 && (order as any).staff_id) {
+        await supabase.from('feedback').insert({
+          order_id: order.id,
+          rating: 5,
+          tip_amount: tip,
+          staff_id: (order as any).staff_id,
+          customer_id: user?.id ?? null,
+          comment: `Tip via ${methodLabel}`,
+        } as any);
+      }
+
       await supabase.from('orders').update({ status: 'paid' as const }).eq('id', order.id);
       clearStoredActiveOrder(order.branch_id);
       queryClient.invalidateQueries({ queryKey: ['active-order', order.branch_id] });
-      toast.success('Payment successful!');
+      toast.success(`Paid ${total.toFixed(2)} ETB via ${methodLabel}${tip > 0 ? ` (incl. ${tip.toFixed(2)} ETB tip)` : ''}`);
+      setShowPayModal(false);
       refetch();
-    } else {
-      toast.error('Payment failed');
+    } catch (e: any) {
+      toast.error(e.message || 'Payment failed');
+    } finally {
+      setPaying(false);
     }
   };
 
