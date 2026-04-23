@@ -124,7 +124,8 @@ const BranchFeedback = () => {
       <div className="grid md:grid-cols-2 gap-4">
         {filtered.map((f: any) => {
           const itemName = f.menu_items?.name || (f.menu_item_id ? 'Deleted item' : 'Unknown');
-          const customerName = f.profiles?.full_name || f.profiles?.email || 'Anonymous';
+          const customerProfile = profileFor(f.customer_id);
+          const customerName = customerProfile?.full_name || customerProfile?.email || 'Anonymous';
           const tip = Number(f.tip_amount || 0);
           return (
             <Card key={f.id} className="shadow-card border-0">
