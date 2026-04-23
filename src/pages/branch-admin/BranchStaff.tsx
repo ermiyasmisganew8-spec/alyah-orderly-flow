@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -30,13 +30,33 @@ const BranchStaff = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from('user_roles')
-        .select('*, profiles!inner(full_name, email, phone, is_active)')
+        .select('*')
         .eq('branch_id', branchId!)
         .eq('role', 'staff');
       return data || [];
     },
     enabled: !!branchId,
   });
+
+  const userIds = useMemo(
+    () => (staffRoles || []).map((r: any) => r.user_id).filter(Boolean),
+    [staffRoles]
+  );
+
+  const { data: staffProfiles } = useQuery({
+    queryKey: ['branch-staff-profiles', userIds.join(',')],
+    queryFn: async () => {
+      if (userIds.length === 0) return [];
+      const { data } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, email, phone, is_active')
+        .in('user_id', userIds);
+      return data || [];
+    },
+    enabled: userIds.length > 0,
+  });
+
+  const profileFor = (uid: string) => staffProfiles?.find((p: any) => p.user_id === uid);
 
   const addStaff = useMutation({
     mutationFn: async () => {
