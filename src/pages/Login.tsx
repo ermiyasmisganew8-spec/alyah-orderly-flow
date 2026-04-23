@@ -46,9 +46,10 @@ const Login = () => {
       }
 
       let redirect = ROLE_REDIRECTS[roleData.role];
-      // Waiters land on the tips page; cashiers/managers see the orders dashboard
-      if (roleData.role === 'staff' && (roleData as any).staff_position === 'waiter') {
-        redirect = '/staff/tips';
+      // Only managers see the orders dashboard; waiters and chiefs go to the tips page
+      if (roleData.role === 'staff') {
+        const pos = (roleData as any).staff_position;
+        redirect = pos === 'manager' ? '/staff' : '/staff/tips';
       }
       if (!redirect) {
         await supabase.auth.signOut();

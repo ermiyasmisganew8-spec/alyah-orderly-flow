@@ -33,16 +33,16 @@ const StaffLayout = () => {
     navigate('/login');
   };
 
-  const isWaiter = position === 'waiter';
+  const isManager = position === 'manager';
 
-  const items = isWaiter
+  const items = isManager
     ? [
-        { title: 'My Tips', url: '/staff/tips', icon: Coins },
+        { title: 'Dashboard', url: '/staff', icon: LayoutDashboard },
+        { title: 'Tips Overview', url: '/staff/tips-overview', icon: Coins },
         { title: 'Settings', url: '/staff/settings', icon: Settings },
       ]
     : [
-        { title: 'Dashboard', url: '/staff', icon: LayoutDashboard },
-        { title: 'Tips Overview', url: '/staff/tips-overview', icon: Coins },
+        { title: 'My Tips', url: '/staff/tips', icon: Coins },
         { title: 'Settings', url: '/staff/settings', icon: Settings },
       ];
 
