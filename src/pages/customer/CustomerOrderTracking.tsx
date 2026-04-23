@@ -39,6 +39,13 @@ const CustomerOrderTracking = () => {
   const [comment, setComment] = useState('');
   const [tipAmount, setTipAmount] = useState('');
 
+  // Payment modal state
+  const [showPayModal, setShowPayModal] = useState(false);
+  const [payTipPreset, setPayTipPreset] = useState<'0' | '5' | '10' | '15' | 'custom'>('10');
+  const [payTipCustom, setPayTipCustom] = useState('');
+  const [payMethod, setPayMethod] = useState<'cbe' | 'telebirr' | 'cash'>('cbe');
+  const [paying, setPaying] = useState(false);
+
   // Auth modal state
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
