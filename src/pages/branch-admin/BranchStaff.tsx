@@ -113,11 +113,11 @@ const BranchStaff = () => {
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="waiter">Waiter</SelectItem>
-                      <SelectItem value="cashier">Cashier</SelectItem>
+                      <SelectItem value="chief">Chief</SelectItem>
                       <SelectItem value="manager">Manager</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-xs text-muted-foreground mt-1">Waiters see only their tips; cashiers/managers see the orders dashboard.</p>
+                  <p className="text-xs text-muted-foreground mt-1">Waiters and chiefs see only their tips; only managers see the orders dashboard.</p>
                 </div>
                 <div><Label>Password</Label><Input type="password" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} required minLength={6} /></div>
                 <Button type="submit" className="w-full" disabled={addStaff.isPending}>{addStaff.isPending ? 'Adding...' : 'Add Staff'}</Button>
