@@ -13,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { ORDER_STATUS_LABELS } from '@/lib/constants';
-import { CheckCircle, Clock, ChefHat, UtensilsCrossed, Star, MessageSquare, LogIn } from 'lucide-react';
+import { CheckCircle, Clock, ChefHat, UtensilsCrossed, Star, MessageSquare, LogIn, CreditCard, Smartphone, Coins } from 'lucide-react';
 import { clearStoredActiveOrder } from '@/hooks/useActiveOrder';
 
 interface OutletCtx {
