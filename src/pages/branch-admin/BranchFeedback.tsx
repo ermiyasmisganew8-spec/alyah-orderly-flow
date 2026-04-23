@@ -17,35 +17,57 @@ const BranchFeedback = () => {
   const { data: feedbackList } = useQuery({
     queryKey: ['feedback', branchId],
     queryFn: async () => {
-      const { data } = await supabase
+      // Get this branch's order IDs first (no FK embed available between feedback.order_id and orders)
+      const { data: branchOrders } = await supabase
+        .from('orders')
+        .select('id, table_number')
+        .eq('branch_id', branchId!);
+      const orderIds = (branchOrders || []).map(o => o.id);
+      if (orderIds.length === 0) return [];
+      const orderMap = new Map(branchOrders!.map(o => [o.id, o]));
+
+      const { data: rows } = await supabase
         .from('feedback')
-        .select('*, orders!inner(branch_id, table_number), menu_items(name), profiles:customer_id(full_name, email)')
-        .eq('orders.branch_id', branchId!)
+        .select('*, menu_items(name)')
+        .in('order_id', orderIds)
         .order('created_at', { ascending: false });
-      return data || [];
+      return (rows || []).map((r: any) => ({ ...r, orders: orderMap.get(r.order_id) }));
     },
     enabled: !!branchId,
   });
 
-  // Resolve staff names for filter dropdown and display
+  // Resolve customer + staff names by joining profiles client-side (no FK relationship in schema)
+  const personIds = useMemo(() => {
+    const ids = new Set<string>();
+    (feedbackList || []).forEach((f: any) => {
+      if (f.customer_id) ids.add(f.customer_id);
+      if (f.staff_id) ids.add(f.staff_id);
+    });
+    return Array.from(ids);
+  }, [feedbackList]);
+
+  const { data: peopleProfiles } = useQuery({
+    queryKey: ['feedback-people', personIds.join(',')],
+    queryFn: async () => {
+      if (personIds.length === 0) return [];
+      const { data } = await supabase.from('profiles').select('user_id, full_name, email').in('user_id', personIds);
+      return data || [];
+    },
+    enabled: personIds.length > 0,
+  });
+
+  const profileFor = (id: string | null) =>
+    id ? peopleProfiles?.find((p: any) => p.user_id === id) : undefined;
+
+  // Staff list for filter dropdown
   const staffIds = useMemo(
     () => Array.from(new Set((feedbackList || []).map((f: any) => f.staff_id).filter(Boolean))),
     [feedbackList]
   );
 
-  const { data: staffProfiles } = useQuery({
-    queryKey: ['staff-profiles', staffIds.join(',')],
-    queryFn: async () => {
-      if (staffIds.length === 0) return [];
-      const { data } = await supabase.from('profiles').select('user_id, full_name, email').in('user_id', staffIds);
-      return data || [];
-    },
-    enabled: staffIds.length > 0,
-  });
-
   const staffName = (id: string | null) => {
     if (!id) return '—';
-    const p = staffProfiles?.find((x: any) => x.user_id === id);
+    const p = profileFor(id);
     return p?.full_name || p?.email || id.slice(0, 8);
   };
 
