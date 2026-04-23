@@ -28,12 +28,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data } = await supabase
       .from('user_roles')
       .select('role, company_id, branch_id')
-      .eq('user_id', userId)
-      .maybeSingle();
-    if (data) {
-      setUserRole(data.role);
-      setCompanyId(data.company_id);
-      setBranchId(data.branch_id);
+      .eq('user_id', userId);
+    if (data && data.length > 0) {
+      const priority = ['platform_admin', 'company_admin', 'branch_admin', 'staff', 'customer'];
+      const top = [...data].sort(
+        (a, b) => priority.indexOf(a.role as string) - priority.indexOf(b.role as string)
+      )[0];
+      setUserRole(top.role);
+      setCompanyId(top.company_id);
+      setBranchId(top.branch_id);
     } else {
       setUserRole('customer');
       setCompanyId(null);

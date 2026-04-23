@@ -33,17 +33,22 @@ const Login = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Authentication failed');
 
-      const { data: roleData } = await supabase
+      const { data: roleRows } = await supabase
         .from('user_roles')
         .select('role, staff_position')
-        .eq('user_id', user.id)
-        .maybeSingle();
+        .eq('user_id', user.id);
 
-      if (!roleData?.role) {
+      if (!roleRows || roleRows.length === 0) {
         await supabase.auth.signOut();
         toast.error('Account not properly configured. Contact support.');
         return;
       }
+
+      // Pick highest-privilege role if a user has multiple
+      const priority = ['platform_admin', 'company_admin', 'branch_admin', 'staff', 'customer'];
+      const roleData = [...roleRows].sort(
+        (a, b) => priority.indexOf(a.role) - priority.indexOf(b.role)
+      )[0];
 
       let redirect = ROLE_REDIRECTS[roleData.role];
       // Only managers see the orders dashboard; waiters and chiefs go to the tips page
