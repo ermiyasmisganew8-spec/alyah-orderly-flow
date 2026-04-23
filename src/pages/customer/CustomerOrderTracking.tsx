@@ -290,10 +290,87 @@ const CustomerOrderTracking = () => {
 
       {/* Pay Button */}
       {order.status === 'served' && (
-        <Button className="w-full" size="lg" onClick={handlePayment}>
+        <Button className="w-full" size="lg" onClick={() => setShowPayModal(true)}>
           Pay Now — {order.total_amount} ETB
         </Button>
       )}
+
+      {/* Payment Modal */}
+      <Dialog open={showPayModal} onOpenChange={setShowPayModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <CreditCard className="h-5 w-5" /> Complete Payment
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="rounded-lg border p-3 bg-muted/30">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Subtotal</span>
+                <span className="font-medium">{Number(order.total_amount).toFixed(2)} ETB</span>
+              </div>
+              <div className="flex justify-between text-sm mt-1">
+                <span className="text-muted-foreground flex items-center gap-1"><Coins className="h-3.5 w-3.5" /> Tip</span>
+                <span className="font-medium">{computeTip(Number(order.total_amount)).toFixed(2)} ETB</span>
+              </div>
+              <div className="flex justify-between font-bold pt-2 border-t mt-2">
+                <span>Total</span>
+                <span className="text-primary">
+                  {(Number(order.total_amount) + computeTip(Number(order.total_amount))).toFixed(2)} ETB
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <Label className="text-sm mb-2 block">Add a tip for your waitress</Label>
+              <div className="grid grid-cols-5 gap-2">
+                {(['0', '5', '10', '15', 'custom'] as const).map(p => (
+                  <Button
+                    key={p}
+                    type="button"
+                    variant={payTipPreset === p ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setPayTipPreset(p)}
+                  >
+                    {p === 'custom' ? 'Custom' : p === '0' ? 'No tip' : `${p}%`}
+                  </Button>
+                ))}
+              </div>
+              {payTipPreset === 'custom' && (
+                <Input
+                  type="number"
+                  step="any"
+                  min="0"
+                  placeholder="Custom tip in ETB"
+                  value={payTipCustom}
+                  onChange={e => setPayTipCustom(e.target.value)}
+                  className="mt-2"
+                />
+              )}
+              <p className="text-xs text-muted-foreground mt-1">Tip goes to the waitress assigned to this table.</p>
+            </div>
+
+            <div>
+              <Label className="text-sm mb-2 block">Payment method</Label>
+              <div className="grid grid-cols-3 gap-2">
+                <Button type="button" variant={payMethod === 'cbe' ? 'default' : 'outline'} size="sm" onClick={() => setPayMethod('cbe')}>
+                  <CreditCard className="h-4 w-4 mr-1" /> CBE Birr
+                </Button>
+                <Button type="button" variant={payMethod === 'telebirr' ? 'default' : 'outline'} size="sm" onClick={() => setPayMethod('telebirr')}>
+                  <Smartphone className="h-4 w-4 mr-1" /> Telebirr
+                </Button>
+                <Button type="button" variant={payMethod === 'cash' ? 'default' : 'outline'} size="sm" onClick={() => setPayMethod('cash')}>
+                  Cash
+                </Button>
+              </div>
+            </div>
+
+            <Button className="w-full" size="lg" disabled={paying} onClick={handleConfirmPayment}>
+              {paying ? 'Processing...' : `Pay ${(Number(order.total_amount) + computeTip(Number(order.total_amount))).toFixed(2)} ETB`}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Auth Modal */}
       <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
