@@ -433,21 +433,6 @@ const CustomerOrderTracking = () => {
               onChange={e => setComment(e.target.value)}
               rows={3}
             />
-            <div>
-              <Label htmlFor="tip" className="text-sm">Optional Tip (ETB)</Label>
-              <Input
-                id="tip"
-                type="number"
-                step="any"
-                min="0"
-                placeholder="0.00"
-                value={tipAmount}
-                onChange={e => setTipAmount(e.target.value)}
-              />
-              <p className="text-xs text-muted-foreground mt-1">
-                Extra tip for the waitress (record only — pay in cash)
-              </p>
-            </div>
             <Button
               className="w-full"
               onClick={() => submitFeedback.mutate()}
