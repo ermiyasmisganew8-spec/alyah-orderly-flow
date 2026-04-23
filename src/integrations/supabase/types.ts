@@ -351,7 +351,9 @@ export type Database = {
           id: string
           method: string
           order_id: string
+          staff_id: string | null
           status: Database["public"]["Enums"]["payment_status"]
+          tip_amount: number
           transaction_ref: string | null
         }
         Insert: {
@@ -360,7 +362,9 @@ export type Database = {
           id?: string
           method?: string
           order_id: string
+          staff_id?: string | null
           status?: Database["public"]["Enums"]["payment_status"]
+          tip_amount?: number
           transaction_ref?: string | null
         }
         Update: {
@@ -369,7 +373,9 @@ export type Database = {
           id?: string
           method?: string
           order_id?: string
+          staff_id?: string | null
           status?: Database["public"]["Enums"]["payment_status"]
+          tip_amount?: number
           transaction_ref?: string | null
         }
         Relationships: [
