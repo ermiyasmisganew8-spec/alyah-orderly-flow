@@ -13,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { ORDER_STATUS_LABELS } from '@/lib/constants';
-import { CheckCircle, Clock, ChefHat, UtensilsCrossed, Star, MessageSquare, LogIn } from 'lucide-react';
+import { CheckCircle, Clock, ChefHat, UtensilsCrossed, Star, MessageSquare, LogIn, CreditCard, Smartphone, Coins } from 'lucide-react';
 import { clearStoredActiveOrder } from '@/hooks/useActiveOrder';
 
 interface OutletCtx {
@@ -38,6 +38,13 @@ const CustomerOrderTracking = () => {
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [tipAmount, setTipAmount] = useState('');
+
+  // Payment modal state
+  const [showPayModal, setShowPayModal] = useState(false);
+  const [payTipPreset, setPayTipPreset] = useState<'0' | '5' | '10' | '15' | 'custom'>('10');
+  const [payTipCustom, setPayTipCustom] = useState('');
+  const [payMethod, setPayMethod] = useState<'cbe' | 'telebirr' | 'cash'>('cbe');
+  const [paying, setPaying] = useState(false);
 
   // Auth modal state
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -146,23 +153,57 @@ const CustomerOrderTracking = () => {
     }
   };
 
-  const handlePayment = async () => {
+  const computeTip = (subtotal: number) => {
+    if (payTipPreset === 'custom') {
+      const v = parseFloat(payTipCustom);
+      return isNaN(v) || v < 0 ? 0 : v;
+    }
+    const pct = parseInt(payTipPreset, 10);
+    return Math.round((subtotal * pct) / 100 * 100) / 100;
+  };
+
+  const handleConfirmPayment = async () => {
     if (!order) return;
-    const { error: payError } = await supabase.from('payments').insert({
-      order_id: order.id,
-      amount: order.total_amount,
-      method: 'cash',
-      status: 'completed',
-      transaction_ref: `PAY-${Date.now()}`,
-    });
-    if (!payError) {
+    setPaying(true);
+    try {
+      const subtotal = Number(order.total_amount);
+      const tip = computeTip(subtotal);
+      const total = subtotal + tip;
+      const methodLabel = payMethod === 'cbe' ? 'CBE Birr' : payMethod === 'telebirr' ? 'Telebirr' : 'Cash';
+
+      const { error: payError } = await supabase.from('payments').insert({
+        order_id: order.id,
+        amount: total,
+        method: methodLabel,
+        status: 'completed',
+        transaction_ref: `PAY-${Date.now()}`,
+        tip_amount: tip,
+        staff_id: (order as any).staff_id ?? null,
+      } as any);
+      if (payError) throw payError;
+
+      // Record the tip as a feedback row tied to the assigned waiter so it shows in /staff/tips
+      if (tip > 0 && (order as any).staff_id) {
+        await supabase.from('feedback').insert({
+          order_id: order.id,
+          rating: 5,
+          tip_amount: tip,
+          staff_id: (order as any).staff_id,
+          customer_id: user?.id ?? null,
+          comment: `Tip via ${methodLabel}`,
+        } as any);
+      }
+
       await supabase.from('orders').update({ status: 'paid' as const }).eq('id', order.id);
       clearStoredActiveOrder(order.branch_id);
       queryClient.invalidateQueries({ queryKey: ['active-order', order.branch_id] });
-      toast.success('Payment successful!');
+      toast.success(`Paid ${total.toFixed(2)} ETB via ${methodLabel}${tip > 0 ? ` (incl. ${tip.toFixed(2)} ETB tip)` : ''}`);
+      setShowPayModal(false);
       refetch();
-    } else {
-      toast.error('Payment failed');
+    } catch (e: any) {
+      toast.error(e.message || 'Payment failed');
+    } finally {
+      setPaying(false);
     }
   };
 
@@ -249,10 +290,87 @@ const CustomerOrderTracking = () => {
 
       {/* Pay Button */}
       {order.status === 'served' && (
-        <Button className="w-full" size="lg" onClick={handlePayment}>
+        <Button className="w-full" size="lg" onClick={() => setShowPayModal(true)}>
           Pay Now — {order.total_amount} ETB
         </Button>
       )}
+
+      {/* Payment Modal */}
+      <Dialog open={showPayModal} onOpenChange={setShowPayModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="font-display flex items-center gap-2">
+              <CreditCard className="h-5 w-5" /> Complete Payment
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="rounded-lg border p-3 bg-muted/30">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Subtotal</span>
+                <span className="font-medium">{Number(order.total_amount).toFixed(2)} ETB</span>
+              </div>
+              <div className="flex justify-between text-sm mt-1">
+                <span className="text-muted-foreground flex items-center gap-1"><Coins className="h-3.5 w-3.5" /> Tip</span>
+                <span className="font-medium">{computeTip(Number(order.total_amount)).toFixed(2)} ETB</span>
+              </div>
+              <div className="flex justify-between font-bold pt-2 border-t mt-2">
+                <span>Total</span>
+                <span className="text-primary">
+                  {(Number(order.total_amount) + computeTip(Number(order.total_amount))).toFixed(2)} ETB
+                </span>
+              </div>
+            </div>
+
+            <div>
+              <Label className="text-sm mb-2 block">Add a tip for your waitress</Label>
+              <div className="grid grid-cols-5 gap-2">
+                {(['0', '5', '10', '15', 'custom'] as const).map(p => (
+                  <Button
+                    key={p}
+                    type="button"
+                    variant={payTipPreset === p ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setPayTipPreset(p)}
+                  >
+                    {p === 'custom' ? 'Custom' : p === '0' ? 'No tip' : `${p}%`}
+                  </Button>
+                ))}
+              </div>
+              {payTipPreset === 'custom' && (
+                <Input
+                  type="number"
+                  step="any"
+                  min="0"
+                  placeholder="Custom tip in ETB"
+                  value={payTipCustom}
+                  onChange={e => setPayTipCustom(e.target.value)}
+                  className="mt-2"
+                />
+              )}
+              <p className="text-xs text-muted-foreground mt-1">Tip goes to the waitress assigned to this table.</p>
+            </div>
+
+            <div>
+              <Label className="text-sm mb-2 block">Payment method</Label>
+              <div className="grid grid-cols-3 gap-2">
+                <Button type="button" variant={payMethod === 'cbe' ? 'default' : 'outline'} size="sm" onClick={() => setPayMethod('cbe')}>
+                  <CreditCard className="h-4 w-4 mr-1" /> CBE Birr
+                </Button>
+                <Button type="button" variant={payMethod === 'telebirr' ? 'default' : 'outline'} size="sm" onClick={() => setPayMethod('telebirr')}>
+                  <Smartphone className="h-4 w-4 mr-1" /> Telebirr
+                </Button>
+                <Button type="button" variant={payMethod === 'cash' ? 'default' : 'outline'} size="sm" onClick={() => setPayMethod('cash')}>
+                  Cash
+                </Button>
+              </div>
+            </div>
+
+            <Button className="w-full" size="lg" disabled={paying} onClick={handleConfirmPayment}>
+              {paying ? 'Processing...' : `Pay ${(Number(order.total_amount) + computeTip(Number(order.total_amount))).toFixed(2)} ETB`}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Auth Modal */}
       <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>

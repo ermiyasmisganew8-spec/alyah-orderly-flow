@@ -53,6 +53,18 @@ const CustomerCart = () => {
         return;
       }
 
+      // Auto-assign a waiter from this branch (round-robin via random pick)
+      let assignedStaffId: string | null = null;
+      const { data: waiters } = await supabase
+        .from('user_roles')
+        .select('user_id')
+        .eq('branch_id', branchId)
+        .eq('role', 'staff')
+        .eq('staff_position', 'waiter');
+      if (waiters && waiters.length > 0) {
+        assignedStaffId = waiters[Math.floor(Math.random() * waiters.length)].user_id;
+      }
+
       const { data: order, error: orderError } = await supabase
         .from('orders')
         .insert({
@@ -61,6 +73,7 @@ const CustomerCart = () => {
           total_amount: totalPrice,
           status: 'pending',
           customer_id: user?.id ?? null,
+          staff_id: assignedStaffId,
         })
         .select()
         .single();
