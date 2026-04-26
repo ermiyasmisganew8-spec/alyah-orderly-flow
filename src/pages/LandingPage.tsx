@@ -10,7 +10,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { QrCode, Clock, ShieldCheck, ChartBar as BarChart3, Smartphone, Utensils, ChefHat, Building2, CreditCard, Megaphone, TrendingUp, Star, Menu as MenuIcon, X, Check, ArrowRight, Play, Facebook, Instagram, Linkedin, Mail, Phone, MapPin } from 'lucide-react';
+import {
+  QrCode, Clock, ShieldCheck, BarChart3, Smartphone, Utensils,
+  ChefHat, Building2, CreditCard, Megaphone, TrendingUp, Star,
+  Menu as MenuIcon, X, Check, ArrowRight, Play,
+  Facebook, Instagram, Linkedin, Mail, Phone, MapPin
+} from 'lucide-react';
+import heroImage from '@/assets/hero-restaurant.jpg';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -126,7 +132,7 @@ const LandingPage = () => {
       {/* Hero with background image */}
       <section className="relative overflow-hidden">
         <img
-          src="https://images.pexels.com/photos/1624487/pexels-photo-1624487.jpeg?auto=compress&cs=tinysrgb&w=1920"
+          src={heroImage}
           alt="Authentic Ethiopian restaurant interior with traditional dishes"
           width={1920}
           height={1080}
