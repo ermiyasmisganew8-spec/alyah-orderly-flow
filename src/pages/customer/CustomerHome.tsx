@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import heroBg from '@/assets/hero-bg.jpg';
 
 interface OutletCtx {
   companyId: string;
@@ -35,7 +34,7 @@ const CustomerHome = () => {
     <div>
       {/* Hero */}
       <section className="relative h-[70vh] min-h-[500px] flex items-center justify-center overflow-hidden">
-        <img src={heroBg} alt={`${companyName} Cafe`} className="absolute inset-0 w-full h-full object-cover" width={1920} height={1080} />
+        <img src="https://images.pexels.com/photos/3407881/pexels-photo-3407881.jpeg?auto=compress&cs=tinysrgb&w=1920" alt={`${companyName} Cafe`} className="absolute inset-0 w-full h-full object-cover" width={1920} height={1080} />
         <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/40 to-transparent" />
         <div className="relative z-10 text-center px-4 max-w-2xl animate-fade-in">
           <h1 className="text-4xl md:text-6xl font-display font-bold text-primary-foreground mb-4">
