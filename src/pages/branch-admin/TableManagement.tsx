@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -13,10 +13,6 @@ import { toast } from 'sonner';
 import { Plus, Download, QrCode, Trash2 } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
 
-interface OutletCtx {
-  branchId: string;
-  companyId: string;
-}
 
 interface BranchTable {
   id: string;
@@ -32,7 +28,7 @@ interface Staff {
 }
 
 const TableManagement = () => {
-  const { branchId, companyId } = useOutletContext<OutletCtx>();
+  const { branchId, companyId } = useAuth();
   const [showAddModal, setShowAddModal] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
   const [selectedTable, setSelectedTable] = useState<BranchTable | null>(null);

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,9 +10,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Upload } from 'lucide-react';
 
-interface OutletCtx {
-  companyId: string;
-}
 
 interface FooterData {
   address?: string;
@@ -32,7 +29,7 @@ interface FormState {
 }
 
 const BrandingSettings = () => {
-  const { companyId } = useOutletContext<OutletCtx>();
+  const { companyId } = useAuth();
   const queryClient = useQueryClient();
 
   const { data: company, isLoading } = useQuery({
