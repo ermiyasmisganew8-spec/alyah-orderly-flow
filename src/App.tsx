@@ -40,6 +40,7 @@ import BranchAnalytics from "@/pages/branch-admin/BranchAnalytics";
 import BranchStaff from "@/pages/branch-admin/BranchStaff";
 import BranchFeedback from "@/pages/branch-admin/BranchFeedback";
 import BranchSettings from "@/pages/branch-admin/BranchSettings";
+import TableManagement from "@/pages/branch-admin/TableManagement";
 
 // Company Admin
 import CompanyAdminLayout from "@/components/admin/CompanyAdminLayout";
@@ -49,6 +50,7 @@ import CompanyPermissions from "@/pages/company-admin/CompanyPermissions";
 import BranchManagement from "@/pages/company-admin/BranchManagement";
 import CompanyInfo from "@/pages/company-admin/CompanyInfo";
 import CompanySettings from "@/pages/company-admin/CompanySettings";
+import BrandingSettings from "@/pages/company-admin/BrandingSettings";
 
 // Platform Admin
 import PlatformAdminLayout from "@/components/admin/PlatformAdminLayout";
@@ -57,7 +59,8 @@ import CompanyManagement from "@/pages/platform-admin/CompanyManagement";
 import CompanyRequests from "@/pages/platform-admin/CompanyRequests";
 import GlobalSettings from "@/pages/platform-admin/GlobalSettings";
 import SecurityLogs from "@/pages/platform-admin/SecurityLogs";
-import FinancialReports from "@/pages/platform-admin/FinancialReports";
+import PackagesManagement from "@/pages/platform-admin/PackagesManagement";
+import PlatformProfile from "@/pages/platform-admin/PlatformProfile";
 
 const queryClient = new QueryClient();
 
@@ -101,6 +104,7 @@ const App = () => (
               <Route path="menu" element={<MenuManagement />} />
               <Route path="categories" element={<CategoryManagement />} />
               <Route path="promotions" element={<BranchPromotions />} />
+              <Route path="tables" element={<TableManagement />} />
               <Route path="analytics" element={<BranchAnalytics />} />
               <Route path="staff" element={<BranchStaff />} />
               <Route path="feedback" element={<BranchFeedback />} />
@@ -114,6 +118,7 @@ const App = () => (
               <Route path="permissions" element={<CompanyPermissions />} />
               <Route path="branches" element={<BranchManagement />} />
               <Route path="info" element={<CompanyInfo />} />
+              <Route path="branding" element={<BrandingSettings />} />
               <Route path="settings" element={<CompanySettings />} />
             </Route>
 
@@ -122,9 +127,10 @@ const App = () => (
               <Route index element={<PlatformDashboard />} />
               <Route path="companies" element={<CompanyManagement />} />
               <Route path="requests" element={<CompanyRequests />} />
+              <Route path="packages" element={<PackagesManagement />} />
               <Route path="settings" element={<GlobalSettings />} />
               <Route path="security" element={<SecurityLogs />} />
-              <Route path="reports" element={<FinancialReports />} />
+              <Route path="profile" element={<PlatformProfile />} />
             </Route>
 
             <Route path="*" element={<NotFound />} />
