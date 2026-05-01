@@ -16,7 +16,7 @@ const CustomerLayout = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from('restaurant_companies')
-        .select('name, contact_email, phone, location, opening_hours, about_story, values_text')
+        .select('name, contact_email, phone, location, opening_hours, about_story, values_text, logo_url, footer_data')
         .eq('id', companyId!)
         .maybeSingle();
       return data;
@@ -26,6 +26,7 @@ const CustomerLayout = () => {
   });
 
   const companyName = company?.name || 'Restaurant';
+  const footerData = (company?.footer_data || {}) as any;
 
   if (!companyId || !branchId) {
     return <div className="flex items-center justify-center min-h-screen text-muted-foreground">Invalid URL</div>;
@@ -34,7 +35,13 @@ const CustomerLayout = () => {
   return (
     <CartProvider>
       <div className="min-h-screen bg-background flex flex-col">
-        <CustomerNav companyId={companyId} branchId={branchId} tableNumber={tableNumber} companyName={companyName} />
+        <CustomerNav
+          companyId={companyId}
+          branchId={branchId}
+          tableNumber={tableNumber}
+          companyName={companyName}
+          logoUrl={company?.logo_url || null}
+        />
         <ActiveOrderBanner companyId={companyId} branchId={branchId} tableNumber={tableNumber} />
         <div className="flex-1">
           <Outlet context={{ companyId, branchId, tableNumber, companyName, company }} />
@@ -44,10 +51,15 @@ const CustomerLayout = () => {
           branchId={branchId}
           tableNumber={tableNumber}
           companyName={companyName}
-          phone={company?.phone}
-          location={company?.location}
-          email={company?.contact_email}
+          phone={footerData.phone || company?.phone}
+          location={footerData.address || company?.location}
+          email={footerData.email || company?.contact_email}
           openingHours={company?.opening_hours as any}
+          openingHoursText={footerData.opening_hours}
+          aboutText={footerData.about_text}
+          socialFacebook={footerData.social_facebook}
+          socialInstagram={footerData.social_instagram}
+          socialLinkedin={footerData.social_linkedin}
         />
       </div>
     </CartProvider>
