@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Building2, GitBranch, ShoppingCart, DollarSign } from 'lucide-react';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Building2, GitBranch, ShoppingCart, Inbox } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const cardStyle = { background: 'hsl(222, 40%, 10%)', border: '1px solid hsl(222, 30%, 18%)' };
 const textMuted = { color: 'hsl(210, 15%, 55%)' };
@@ -23,21 +23,18 @@ const PlatformDashboard = () => {
     queryFn: async () => { const { data } = await supabase.from('orders').select('*'); return data || []; },
   });
 
-  const totalRevenue = orders?.filter(o => o.status === 'paid').reduce((s, o) => s + Number(o.total_amount), 0) || 0;
-
-  const companyRevenue = companies?.map(c => {
+  const companyStats = companies?.map(c => {
     const companyBranches = branches?.filter(b => b.company_id === c.id) || [];
     const branchIds = companyBranches.map(b => b.id);
-    const rev = orders?.filter(o => branchIds.includes(o.branch_id) && o.status === 'paid').reduce((s, o) => s + Number(o.total_amount), 0) || 0;
     const orderCount = orders?.filter(o => branchIds.includes(o.branch_id)).length || 0;
-    return { name: c.name.length > 15 ? c.name.slice(0, 15) + '…' : c.name, revenue: rev, orders: orderCount };
+    return { name: c.name.length > 15 ? c.name.slice(0, 15) + '…' : c.name, orders: orderCount, branches: companyBranches.length };
   }) || [];
 
   const kpis = [
     { icon: Building2, label: 'Companies', value: companies?.length || 0 },
     { icon: GitBranch, label: 'Branches', value: branches?.length || 0 },
     { icon: ShoppingCart, label: 'Total Orders', value: orders?.length || 0 },
-    { icon: DollarSign, label: 'Total Revenue', value: `${totalRevenue} ETB` },
+    { icon: Inbox, label: 'Avg Orders/Co.', value: companies?.length ? Math.round((orders?.length || 0) / companies.length) : 0 },
   ];
 
   return (
@@ -58,37 +55,20 @@ const PlatformDashboard = () => {
         ))}
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        <Card style={cardStyle} className="border-0">
-          <CardHeader><CardTitle className="font-display text-sm">Revenue Trend</CardTitle></CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
-              <LineChart data={[{ month: 'Mar', revenue: totalRevenue }]}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(222, 30%, 18%)" />
-                <XAxis dataKey="month" tick={{ fill: 'hsl(210, 15%, 55%)', fontSize: 11 }} />
-                <YAxis tick={{ fill: 'hsl(210, 15%, 55%)', fontSize: 11 }} />
-                <Tooltip contentStyle={{ background: 'hsl(222, 40%, 10%)', border: '1px solid hsl(222, 30%, 18%)' }} />
-                <Line type="monotone" dataKey="revenue" stroke="hsl(25, 80%, 50%)" strokeWidth={2} />
-              </LineChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-        <Card style={cardStyle} className="border-0">
-          <CardHeader><CardTitle className="font-display text-sm">Orders by Company</CardTitle></CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={companyRevenue}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(222, 30%, 18%)" />
-                <XAxis dataKey="name" tick={{ fill: 'hsl(210, 15%, 55%)', fontSize: 11 }} />
-                <YAxis tick={{ fill: 'hsl(210, 15%, 55%)', fontSize: 11 }} />
-                <Tooltip contentStyle={{ background: 'hsl(222, 40%, 10%)', border: '1px solid hsl(222, 30%, 18%)' }} />
-                <Bar dataKey="orders" fill="hsl(25, 80%, 50%)" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-      </div>
+      <Card style={cardStyle} className="border-0">
+        <CardHeader><CardTitle className="font-display text-sm">Orders by Company</CardTitle></CardHeader>
+        <CardContent>
+          <ResponsiveContainer width="100%" height={250}>
+            <BarChart data={companyStats}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(222, 30%, 18%)" />
+              <XAxis dataKey="name" tick={{ fill: 'hsl(210, 15%, 55%)', fontSize: 11 }} />
+              <YAxis tick={{ fill: 'hsl(210, 15%, 55%)', fontSize: 11 }} />
+              <Tooltip contentStyle={{ background: 'hsl(222, 40%, 10%)', border: '1px solid hsl(222, 30%, 18%)' }} />
+              <Bar dataKey="orders" fill="hsl(25, 80%, 50%)" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </CardContent>
+      </Card>
     </div>
   );
 };

@@ -157,9 +157,7 @@ const CompanyManagement = () => {
 
   const getCompanyStats = (companyId: string) => {
     const cBranches = branches?.filter(b => b.company_id === companyId) || [];
-    const branchIds = cBranches.map(b => b.id);
-    const rev = orders?.filter(o => branchIds.includes(o.branch_id) && o.status === 'paid').reduce((s, o) => s + Number(o.total_amount), 0) || 0;
-    return { branches: cBranches.length, revenue: rev, firstBranchId: cBranches[0]?.id };
+    return { branches: cBranches.length, firstBranchId: cBranches[0]?.id };
   };
 
   const getCustomerUrl = (companyId: string, branchId?: string) => {
@@ -250,7 +248,7 @@ const CompanyManagement = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead><tr className="border-b text-left" style={{ borderColor: 'hsl(222, 30%, 18%)', color: 'hsl(210, 15%, 55%)' }}>
-                  <th className="p-3">Name</th><th className="p-3">Email</th><th className="p-3">Branches</th><th className="p-3">Revenue</th><th className="p-3">Customer URL</th><th className="p-3">Status</th><th className="p-3">Actions</th>
+                  <th className="p-3">Name</th><th className="p-3">Email</th><th className="p-3">Branches</th><th className="p-3">Customer URL</th><th className="p-3">Status</th><th className="p-3">Actions</th>
                 </tr></thead>
                 <tbody>
                   {companies?.map(c => {
@@ -263,7 +261,6 @@ const CompanyManagement = () => {
                         <td className="p-3 font-medium">{c.name}</td>
                         <td className="p-3" style={{ color: 'hsl(210, 15%, 55%)' }}>{c.contact_email || '—'}</td>
                         <td className="p-3">{stats.branches}</td>
-                        <td className="p-3">{stats.revenue} ETB</td>
                         <td className="p-3">
                           {stats.firstBranchId ? (
                             <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => handleCopyUrl(customerUrl)}>

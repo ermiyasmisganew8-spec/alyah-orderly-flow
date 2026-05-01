@@ -58,6 +58,47 @@ export type Database = {
           },
         ]
       }
+      branch_tables: {
+        Row: {
+          assigned_staff_id: string | null
+          branch_id: string
+          created_at: string
+          id: string
+          qr_code_url: string | null
+          status: string
+          table_number: number
+          updated_at: string
+        }
+        Insert: {
+          assigned_staff_id?: string | null
+          branch_id: string
+          created_at?: string
+          id?: string
+          qr_code_url?: string | null
+          status?: string
+          table_number: number
+          updated_at?: string
+        }
+        Update: {
+          assigned_staff_id?: string | null
+          branch_id?: string
+          created_at?: string
+          id?: string
+          qr_code_url?: string | null
+          status?: string
+          table_number?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "branch_tables_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "restaurant_branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       categories: {
         Row: {
           branch_id: string
@@ -95,12 +136,15 @@ export type Database = {
       }
       company_requests: {
         Row: {
+          billing_cycle: string | null
           branch_count: string
           created_at: string
           email: string
           id: string
           notes: string | null
           owner_name: string
+          package_id: string | null
+          payment_status: string
           phone: string
           preferred_plan: string
           restaurant_name: string
@@ -108,12 +152,15 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          billing_cycle?: string | null
           branch_count?: string
           created_at?: string
           email: string
           id?: string
           notes?: string | null
           owner_name: string
+          package_id?: string | null
+          payment_status?: string
           phone: string
           preferred_plan?: string
           restaurant_name: string
@@ -121,19 +168,30 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          billing_cycle?: string | null
           branch_count?: string
           created_at?: string
           email?: string
           id?: string
           notes?: string | null
           owner_name?: string
+          package_id?: string | null
+          payment_status?: string
           phone?: string
           preferred_plan?: string
           restaurant_name?: string
           status?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "company_requests_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "packages"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       feedback: {
         Row: {
@@ -344,6 +402,42 @@ export type Database = {
           },
         ]
       }
+      packages: {
+        Row: {
+          created_at: string
+          display_order: number
+          features: Json
+          id: string
+          is_active: boolean
+          monthly_price: number
+          name: string
+          updated_at: string
+          yearly_price: number
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          features?: Json
+          id?: string
+          is_active?: boolean
+          monthly_price?: number
+          name: string
+          updated_at?: string
+          yearly_price?: number
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          features?: Json
+          id?: string
+          is_active?: boolean
+          monthly_price?: number
+          name?: string
+          updated_at?: string
+          yearly_price?: number
+        }
+        Relationships: []
+      }
       payments: {
         Row: {
           amount: number
@@ -521,8 +615,10 @@ export type Database = {
           address: string | null
           contact_email: string | null
           created_at: string
+          footer_data: Json | null
           id: string
           location: string | null
+          logo_url: string | null
           name: string
           opening_hours: Json | null
           phone: string | null
@@ -535,8 +631,10 @@ export type Database = {
           address?: string | null
           contact_email?: string | null
           created_at?: string
+          footer_data?: Json | null
           id?: string
           location?: string | null
+          logo_url?: string | null
           name: string
           opening_hours?: Json | null
           phone?: string | null
@@ -549,8 +647,10 @@ export type Database = {
           address?: string | null
           contact_email?: string | null
           created_at?: string
+          footer_data?: Json | null
           id?: string
           location?: string | null
+          logo_url?: string | null
           name?: string
           opening_hours?: Json | null
           phone?: string | null

@@ -5,7 +5,7 @@ import { useCompanyName } from '@/hooks/useCompanyName';
 import { useBranchName } from '@/hooks/useBranchName';
 import { Button } from '@/components/ui/button';
 import {
-  LayoutDashboard, UtensilsCrossed, Tag, BarChart3, Users, MessageSquare, Settings, Menu, X, LogOut
+  LayoutDashboard, UtensilsCrossed, Tag, BarChart3, Users, MessageSquare, Settings, Menu, X, LogOut, QrCode
 } from 'lucide-react';
 
 const sidebarItems = [
@@ -13,6 +13,7 @@ const sidebarItems = [
   { icon: UtensilsCrossed, label: 'Menu Items', path: '/branch-admin/menu' },
   { icon: Tag, label: 'Categories', path: '/branch-admin/categories' },
   { icon: Tag, label: 'Promotions', path: '/branch-admin/promotions' },
+  { icon: QrCode, label: 'Tables & QR', path: '/branch-admin/tables' },
   { icon: BarChart3, label: 'Analytics', path: '/branch-admin/analytics' },
   { icon: Users, label: 'Staff', path: '/branch-admin/staff' },
   { icon: MessageSquare, label: 'Feedback', path: '/branch-admin/feedback' },

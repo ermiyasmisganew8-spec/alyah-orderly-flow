@@ -11,9 +11,10 @@ interface CustomerNavProps {
   branchId: string;
   tableNumber: number;
   companyName: string;
+  logoUrl?: string | null;
 }
 
-const CustomerNav = ({ companyId, branchId, tableNumber, companyName }: CustomerNavProps) => {
+const CustomerNav = ({ companyId, branchId, tableNumber, companyName, logoUrl }: CustomerNavProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const { totalItems } = useCart();
   const { user } = useAuth();
@@ -34,7 +35,8 @@ const CustomerNav = ({ companyId, branchId, tableNumber, companyName }: Customer
   return (
     <nav className="sticky top-0 z-50 bg-card/95 backdrop-blur-md border-b shadow-card">
       <div className="container mx-auto px-4 flex items-center justify-between h-16">
-        <Link to={`${base}${tableParam}`} className="font-display text-xl font-bold text-primary">
+        <Link to={`${base}${tableParam}`} className="flex items-center gap-2 font-display text-xl font-bold text-primary">
+          {logoUrl && <img src={logoUrl} alt={companyName} className="h-8 w-8 object-contain rounded" />}
           {companyName}
         </Link>
 

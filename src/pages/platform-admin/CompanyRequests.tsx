@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Check, X, Copy, Clock } from 'lucide-react';
+import { Check, X, Copy, Clock, DollarSign } from 'lucide-react';
 
 const cardStyle = { background: 'hsl(222, 40%, 10%)', border: '1px solid hsl(222, 30%, 18%)' };
 
@@ -82,6 +82,18 @@ const CompanyRequests = () => {
     },
   });
 
+  const markPaidMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('company_requests' as any).update({ payment_status: 'paid' } as any).eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['company-requests'] });
+      toast.success('Marked as paid.');
+    },
+    onError: (err: any) => toast.error(err.message || 'Failed'),
+  });
+
   const handleCopy = () => {
     if (!credModal) return;
     navigator.clipboard.writeText(`Email: ${credModal.email}\nPassword: ${credModal.password}`);
@@ -126,7 +138,8 @@ const CompanyRequests = () => {
               <thead>
                 <tr className="border-b text-left" style={{ borderColor: 'hsl(222, 30%, 18%)', color: 'hsl(210, 15%, 55%)' }}>
                   <th className="p-3">Restaurant</th><th className="p-3">Owner</th><th className="p-3">Email</th>
-                  <th className="p-3">Phone</th><th className="p-3">Plan</th><th className="p-3">Status</th><th className="p-3">Actions</th>
+                  <th className="p-3">Phone</th><th className="p-3">Plan</th><th className="p-3">Cycle</th>
+                  <th className="p-3">Payment</th><th className="p-3">Status</th><th className="p-3">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -137,23 +150,36 @@ const CompanyRequests = () => {
                     <td className="p-3" style={{ color: 'hsl(210, 15%, 55%)' }}>{r.email}</td>
                     <td className="p-3" style={{ color: 'hsl(210, 15%, 55%)' }}>{r.phone}</td>
                     <td className="p-3 capitalize">{r.preferred_plan}</td>
+                    <td className="p-3 capitalize">{r.billing_cycle || 'monthly'}</td>
+                    <td className="p-3">
+                      <Badge variant={r.payment_status === 'paid' ? 'default' : 'secondary'} className="capitalize">
+                        {r.payment_status || 'pending'}
+                      </Badge>
+                    </td>
                     <td className="p-3">{statusBadge(r.status)}</td>
                     <td className="p-3">
-                      {r.status === 'pending' && (
-                        <div className="flex gap-1">
-                          <Button size="sm" variant="ghost" className="text-green-400" onClick={() => approveMutation.mutate(r)} disabled={approveMutation.isPending}>
-                            <Check className="h-3 w-3 mr-1" /> Approve
+                      <div className="flex flex-wrap gap-1">
+                        {r.status === 'pending' && (
+                          <>
+                            <Button size="sm" variant="ghost" className="text-green-400" onClick={() => approveMutation.mutate(r)} disabled={approveMutation.isPending}>
+                              <Check className="h-3 w-3 mr-1" /> Approve
+                            </Button>
+                            <Button size="sm" variant="ghost" className="text-red-400" onClick={() => rejectMutation.mutate(r.id)}>
+                              <X className="h-3 w-3 mr-1" /> Reject
+                            </Button>
+                          </>
+                        )}
+                        {r.payment_status !== 'paid' && (
+                          <Button size="sm" variant="ghost" className="text-blue-400" onClick={() => markPaidMutation.mutate(r.id)}>
+                            <DollarSign className="h-3 w-3 mr-1" /> Mark Paid
                           </Button>
-                          <Button size="sm" variant="ghost" className="text-red-400" onClick={() => rejectMutation.mutate(r.id)}>
-                            <X className="h-3 w-3 mr-1" /> Reject
-                          </Button>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
                 {(!requests || requests.length === 0) && (
-                  <tr><td colSpan={7} className="p-6 text-center" style={{ color: 'hsl(210, 15%, 45%)' }}>
+                  <tr><td colSpan={9} className="p-6 text-center" style={{ color: 'hsl(210, 15%, 45%)' }}>
                     <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" /> No requests yet
                   </td></tr>
                 )}

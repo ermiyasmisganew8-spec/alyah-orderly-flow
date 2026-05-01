@@ -10,9 +10,18 @@ interface Props {
   location?: string | null;
   email?: string | null;
   openingHours?: { weekdays?: string; saturday?: string; sunday?: string } | null;
+  openingHoursText?: string | null;
+  aboutText?: string | null;
+  socialFacebook?: string | null;
+  socialInstagram?: string | null;
+  socialLinkedin?: string | null;
 }
 
-const CustomerFooter = ({ companyId, branchId, tableNumber, companyName, phone, location, email, openingHours }: Props) => {
+const CustomerFooter = ({
+  companyId, branchId, tableNumber, companyName, phone, location, email,
+  openingHours, openingHoursText, aboutText,
+  socialFacebook, socialInstagram, socialLinkedin,
+}: Props) => {
   const baseUrl = `/b/${companyId}/${branchId}`;
   const tableSuffix = `?table=${tableNumber}`;
   const hours = openingHours || {};
@@ -29,11 +38,18 @@ const CustomerFooter = ({ companyId, branchId, tableNumber, companyName, phone, 
           {/* Brand */}
           <div>
             <h3 className="font-display text-xl font-bold text-white mb-2">{companyName}</h3>
-            <p className="text-sm text-gray-400 mb-4">Authentic flavors, served with love.</p>
+            <p className="text-sm text-gray-300 mb-4">{aboutText || 'Authentic flavors, served with love.'}</p>
             <div className="flex gap-3 justify-center md:justify-start">
-              <a href="#" aria-label="Facebook" className={social}><Facebook className="h-4 w-4" /></a>
-              <a href="#" aria-label="Instagram" className={social}><Instagram className="h-4 w-4" /></a>
-              <a href="#" aria-label="LinkedIn" className={social}><Linkedin className="h-4 w-4" /></a>
+              {socialFacebook && <a href={socialFacebook} target="_blank" rel="noreferrer" aria-label="Facebook" className={social}><Facebook className="h-4 w-4" /></a>}
+              {socialInstagram && <a href={socialInstagram} target="_blank" rel="noreferrer" aria-label="Instagram" className={social}><Instagram className="h-4 w-4" /></a>}
+              {socialLinkedin && <a href={socialLinkedin} target="_blank" rel="noreferrer" aria-label="LinkedIn" className={social}><Linkedin className="h-4 w-4" /></a>}
+              {!socialFacebook && !socialInstagram && !socialLinkedin && (
+                <>
+                  <a href="#" aria-label="Facebook" className={social}><Facebook className="h-4 w-4" /></a>
+                  <a href="#" aria-label="Instagram" className={social}><Instagram className="h-4 w-4" /></a>
+                  <a href="#" aria-label="LinkedIn" className={social}><Linkedin className="h-4 w-4" /></a>
+                </>
+              )}
             </div>
           </div>
 
@@ -55,11 +71,15 @@ const CustomerFooter = ({ companyId, branchId, tableNumber, companyName, phone, 
             <ul className="space-y-2 text-sm">
               <li className="flex items-start gap-2 justify-center md:justify-start">
                 <Clock className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
-                <div>
-                  <p>Mon – Thu: <span className="text-white">{hours.weekdays || '11AM – 10PM'}</span></p>
-                  <p>Fri – Sat: <span className="text-white">{hours.saturday || '11AM – 11PM'}</span></p>
-                  <p>Sunday: <span className="text-white">{hours.sunday || '10AM – 9PM'}</span></p>
-                </div>
+                {openingHoursText ? (
+                  <p className="text-white">{openingHoursText}</p>
+                ) : (
+                  <div>
+                    <p>Mon – Thu: <span className="text-white">{hours.weekdays || '11AM – 10PM'}</span></p>
+                    <p>Fri – Sat: <span className="text-white">{hours.saturday || '11AM – 11PM'}</span></p>
+                    <p>Sunday: <span className="text-white">{hours.sunday || '10AM – 9PM'}</span></p>
+                  </div>
+                )}
               </li>
             </ul>
           </div>

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { useState, useRef } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -11,12 +11,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Plus, Download, QrCode, Trash2 } from 'lucide-react';
-import QRCode from 'qrcode.react';
+import { QRCodeCanvas } from 'qrcode.react';
 
-interface OutletCtx {
-  branchId: string;
-  companyId: string;
-}
 
 interface BranchTable {
   id: string;
@@ -32,14 +28,13 @@ interface Staff {
 }
 
 const TableManagement = () => {
-  const { branchId } = useOutletContext<OutletCtx>();
+  const { branchId, companyId } = useAuth();
   const [showAddModal, setShowAddModal] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
   const [selectedTable, setSelectedTable] = useState<BranchTable | null>(null);
   const [tableNumber, setTableNumber] = useState('');
   const [assignedStaffId, setAssignedStaffId] = useState('');
   const queryClient = useQueryClient();
-  const qrCodeRef = useState<HTMLDivElement>(null)[0];
 
   const { data: tables = [] } = useQuery({
     queryKey: ['branch_tables', branchId],
@@ -52,32 +47,39 @@ const TableManagement = () => {
       if (error) throw error;
       return data as BranchTable[];
     },
+    enabled: !!branchId,
   });
 
   const { data: staff = [] } = useQuery({
-    queryKey: ['staff', branchId],
+    queryKey: ['branch-waiters', branchId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: roles } = await supabase
         .from('user_roles')
-        .select('id, user_id, profiles(full_name)')
+        .select('user_id')
         .eq('branch_id', branchId)
-        .eq('staff_position', 'waiter')
-        .limit(100);
-      if (error) throw error;
-      return data.map((s: any) => ({
-        id: s.user_id,
-        full_name: s.profiles?.full_name || 'Unknown',
-      })) as Staff[];
+        .eq('role', 'staff');
+      const userIds = (roles || []).map((r: any) => r.user_id);
+      if (userIds.length === 0) return [] as Staff[];
+      const { data: profs } = await supabase
+        .from('profiles')
+        .select('user_id, full_name')
+        .in('user_id', userIds);
+      return (profs || []).map((p: any) => ({ id: p.user_id, full_name: p.full_name || 'Unknown' })) as Staff[];
     },
+    enabled: !!branchId,
   });
+
+  const buildQRUrl = (tn: number) => `${window.location.origin}/b/${companyId}/${branchId}?table=${tn}`;
 
   const addTableMutation = useMutation({
     mutationFn: async () => {
+      const tn = parseInt(tableNumber);
       const { error } = await supabase.from('branch_tables').insert({
         branch_id: branchId,
-        table_number: parseInt(tableNumber),
+        table_number: tn,
         assigned_staff_id: assignedStaffId || null,
         status: 'active',
+        qr_code_url: buildQRUrl(tn),
       });
       if (error) throw error;
     },
@@ -88,9 +90,7 @@ const TableManagement = () => {
       setTableNumber('');
       setAssignedStaffId('');
     },
-    onError: (err: any) => {
-      toast.error(err.message || 'Failed to add table');
-    },
+    onError: (err: any) => toast.error(err.message || 'Failed to add table'),
   });
 
   const deleteTableMutation = useMutation({
@@ -102,22 +102,28 @@ const TableManagement = () => {
       queryClient.invalidateQueries({ queryKey: ['branch_tables', branchId] });
       toast.success('Table deleted');
     },
-    onError: (err: any) => {
-      toast.error(err.message || 'Failed to delete table');
+    onError: (err: any) => toast.error(err.message || 'Failed to delete table'),
+  });
+
+  const updateStatus = useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const { error } = await supabase.from('branch_tables').update({ status }).eq('id', id);
+      if (error) throw error;
     },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['branch_tables', branchId] }),
   });
 
   const downloadQRCode = (table: BranchTable) => {
     const qrElement = document.getElementById(`qr-${table.id}`);
-    if (qrElement) {
-      const canvas = qrElement.querySelector('canvas');
-      if (canvas) {
-        const link = document.createElement('a');
-        link.href = canvas.toDataURL('image/png');
-        link.download = `table-${table.table_number}-qr.png`;
-        link.click();
-        toast.success('QR code downloaded');
-      }
+    const canvas = qrElement?.querySelector('canvas');
+    if (canvas) {
+      const link = document.createElement('a');
+      link.href = canvas.toDataURL('image/png');
+      link.download = `table-${table.table_number}-qr.png`;
+      link.click();
+      toast.success('QR code downloaded');
+    } else {
+      toast.error('Open the QR code preview first');
     }
   };
 
@@ -132,14 +138,14 @@ const TableManagement = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Tables</CardTitle>
+          <CardTitle>Tables ({tables.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Table #</TableHead>
-                <TableHead>Assigned Staff</TableHead>
+                <TableHead>Assigned Waitress</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
@@ -150,37 +156,20 @@ const TableManagement = () => {
                   <TableCell className="font-semibold">{table.table_number}</TableCell>
                   <TableCell>{staff.find(s => s.id === table.assigned_staff_id)?.full_name || 'Unassigned'}</TableCell>
                   <TableCell>
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      table.status === 'active'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-gray-100 text-gray-800'
-                    }`}>
+                    <button
+                      onClick={() => updateStatus.mutate({ id: table.id, status: table.status === 'active' ? 'inactive' : 'active' })}
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        table.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                      }`}
+                    >
                       {table.status === 'active' ? 'Active' : 'Inactive'}
-                    </span>
+                    </button>
                   </TableCell>
                   <TableCell className="space-x-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        setSelectedTable(table);
-                        setShowQRModal(true);
-                      }}
-                    >
+                    <Button size="sm" variant="outline" onClick={() => { setSelectedTable(table); setShowQRModal(true); }}>
                       <QrCode className="h-4 w-4" />
                     </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => downloadQRCode(table)}
-                    >
-                      <Download className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => deleteTableMutation.mutate(table.id)}
-                    >
+                    <Button size="sm" variant="destructive" onClick={() => deleteTableMutation.mutate(table.id)}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </TableCell>
@@ -194,7 +183,6 @@ const TableManagement = () => {
         </CardContent>
       </Card>
 
-      {/* Add Table Modal */}
       <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
         <DialogContent>
           <DialogHeader>
@@ -203,59 +191,40 @@ const TableManagement = () => {
           <div className="space-y-4">
             <div>
               <Label>Table Number</Label>
-              <Input
-                type="number"
-                min="1"
-                value={tableNumber}
-                onChange={e => setTableNumber(e.target.value)}
-                placeholder="e.g., 1, 2, 3..."
-              />
+              <Input type="number" min="1" value={tableNumber} onChange={e => setTableNumber(e.target.value)} placeholder="e.g., 1" />
             </div>
             <div>
-              <Label>Assign Staff (Optional)</Label>
+              <Label>Assign Waitress (Optional)</Label>
               <Select value={assignedStaffId} onValueChange={setAssignedStaffId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a waiter" />
-                </SelectTrigger>
+                <SelectTrigger><SelectValue placeholder="Select a waitress" /></SelectTrigger>
                 <SelectContent>
-                  {staff.map(s => (
-                    <SelectItem key={s.id} value={s.id}>
-                      {s.full_name}
-                    </SelectItem>
-                  ))}
+                  {staff.map(s => (<SelectItem key={s.id} value={s.id}>{s.full_name}</SelectItem>))}
                 </SelectContent>
               </Select>
             </div>
-            <Button
-              className="w-full"
-              onClick={() => addTableMutation.mutate()}
-              disabled={!tableNumber || addTableMutation.isPending}
-            >
+            <Button className="w-full" onClick={() => addTableMutation.mutate()} disabled={!tableNumber || addTableMutation.isPending}>
               {addTableMutation.isPending ? 'Adding...' : 'Add Table'}
             </Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* QR Code Modal */}
       <Dialog open={showQRModal} onOpenChange={setShowQRModal}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>Table {selectedTable?.table_number} - QR Code</DialogTitle>
+            <DialogTitle>Table {selectedTable?.table_number} – QR Code</DialogTitle>
           </DialogHeader>
           {selectedTable && (
             <div className="flex flex-col items-center gap-4">
-              <div id={`qr-${selectedTable.id}`}>
-                <QRCode
-                  value={JSON.stringify({
-                    branch_id: branchId,
-                    table_number: selectedTable.table_number,
-                  })}
+              <div id={`qr-${selectedTable.id}`} className="bg-white p-4 rounded">
+                <QRCodeCanvas
+                  value={buildQRUrl(selectedTable.table_number)}
                   size={256}
                   level="H"
                   includeMargin
                 />
               </div>
+              <p className="text-xs text-muted-foreground break-all text-center">{buildQRUrl(selectedTable.table_number)}</p>
               <Button className="w-full" onClick={() => downloadQRCode(selectedTable)}>
                 <Download className="h-4 w-4 mr-2" /> Download QR Code
               </Button>
