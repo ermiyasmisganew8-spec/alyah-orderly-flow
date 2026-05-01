@@ -11,7 +11,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Plus, Download, QrCode, Trash2 } from 'lucide-react';
-import QRCode from 'qrcode.react';
+import { QRCodeCanvas } from 'qrcode.react';
 
 interface OutletCtx {
   branchId: string;
@@ -246,11 +246,8 @@ const TableManagement = () => {
           {selectedTable && (
             <div className="flex flex-col items-center gap-4">
               <div id={`qr-${selectedTable.id}`}>
-                <QRCode
-                  value={JSON.stringify({
-                    branch_id: branchId,
-                    table_number: selectedTable.table_number,
-                  })}
+                <QRCodeCanvas
+                  value={`${window.location.origin}/b/${selectedTable && (window as any).__companyId__ || ''}/${branchId}?table=${selectedTable.table_number}`}
                   size={256}
                   level="H"
                   includeMargin
