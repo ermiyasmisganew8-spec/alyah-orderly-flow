@@ -3,16 +3,17 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import {
-  LayoutDashboard, Building2, Settings, Shield, BarChart3, Menu, X, LogOut, Inbox
+  LayoutDashboard, Building2, Settings, Shield, Menu, X, LogOut, Inbox, Package, User
 } from 'lucide-react';
 
 const sidebarItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/platform-admin' },
   { icon: Building2, label: 'Company Management', path: '/platform-admin/companies' },
   { icon: Inbox, label: 'Requests', path: '/platform-admin/requests' },
+  { icon: Package, label: 'Package Management', path: '/platform-admin/packages' },
   { icon: Settings, label: 'Global Settings', path: '/platform-admin/settings' },
   { icon: Shield, label: 'Security Logs', path: '/platform-admin/security' },
-  { icon: BarChart3, label: 'Financial Reports', path: '/platform-admin/reports' },
+  { icon: User, label: 'Profile', path: '/platform-admin/profile' },
 ];
 
 const PlatformAdminLayout = () => {
