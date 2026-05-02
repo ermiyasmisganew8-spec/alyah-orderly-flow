@@ -85,9 +85,40 @@ const BranchFeedback = () => {
     },
   });
 
-  const filtered = (feedbackList || []).filter((f: any) =>
-    staffFilter === 'all' ? true : staffFilter === 'unassigned' ? !f.staff_id : f.staff_id === staffFilter
-  );
+  const filtered = useMemo(() => {
+    const now = new Date();
+    const startOfDay = new Date(now); startOfDay.setHours(0, 0, 0, 0);
+    const startOfWeek = new Date(startOfDay); startOfWeek.setDate(startOfWeek.getDate() - 6);
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    let list = (feedbackList || []).filter((f: any) => {
+      if (staffFilter === 'unassigned' && f.staff_id) return false;
+      if (staffFilter !== 'all' && staffFilter !== 'unassigned' && f.staff_id !== staffFilter) return false;
+
+      const d = new Date(f.created_at);
+      if (periodFilter === 'today' && d < startOfDay) return false;
+      if (periodFilter === 'week' && d < startOfWeek) return false;
+      if (periodFilter === 'month' && d < startOfMonth) return false;
+
+      if (ratingFilter === '5' && f.rating !== 5) return false;
+      if (ratingFilter === '4' && f.rating !== 4) return false;
+      if (ratingFilter === 'low' && f.rating > 3) return false;
+      return true;
+    });
+
+    list = [...list].sort((a: any, b: any) => {
+      if (sortBy === 'date_desc') return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      if (sortBy === 'date_asc') return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      if (sortBy === 'tip_desc') return Number(b.tip_amount || 0) - Number(a.tip_amount || 0);
+      if (sortBy === 'name_asc') {
+        const an = profileFor(a.customer_id)?.full_name || '';
+        const bn = profileFor(b.customer_id)?.full_name || '';
+        return an.localeCompare(bn);
+      }
+      return 0;
+    });
+    return list;
+  }, [feedbackList, staffFilter, periodFilter, ratingFilter, sortBy, peopleProfiles]);
 
   const avgRating = filtered.length
     ? (filtered.reduce((s, f: any) => s + f.rating, 0) / filtered.length).toFixed(1)
@@ -98,9 +129,9 @@ const BranchFeedback = () => {
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <h1 className="text-2xl font-display font-bold">Feedback</h1>
-        <div className="flex items-center gap-4 flex-wrap">
+        <div className="flex items-center gap-3 flex-wrap">
           <Select value={staffFilter} onValueChange={setStaffFilter}>
-            <SelectTrigger className="w-56">
+            <SelectTrigger className="w-44">
               <SelectValue placeholder="Filter by staff" />
             </SelectTrigger>
             <SelectContent>
@@ -109,6 +140,33 @@ const BranchFeedback = () => {
               {staffIds.map((id: any) => (
                 <SelectItem key={id} value={id}>{staffName(id)}</SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+          <Select value={periodFilter} onValueChange={(v: any) => setPeriodFilter(v)}>
+            <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All time</SelectItem>
+              <SelectItem value="today">Today</SelectItem>
+              <SelectItem value="week">This week</SelectItem>
+              <SelectItem value="month">This month</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={ratingFilter} onValueChange={(v: any) => setRatingFilter(v)}>
+            <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All ratings</SelectItem>
+              <SelectItem value="5">5 stars</SelectItem>
+              <SelectItem value="4">4 stars</SelectItem>
+              <SelectItem value="low">3 & below</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={sortBy} onValueChange={(v: any) => setSortBy(v)}>
+            <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="date_desc">Date (newest)</SelectItem>
+              <SelectItem value="date_asc">Date (oldest)</SelectItem>
+              <SelectItem value="tip_desc">Tip amount</SelectItem>
+              <SelectItem value="name_asc">Customer name</SelectItem>
             </SelectContent>
           </Select>
           <div className="flex items-center gap-2">
