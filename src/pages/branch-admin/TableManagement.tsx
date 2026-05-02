@@ -31,7 +31,11 @@ const TableManagement = () => {
   const { branchId, companyId } = useAuth();
   const [showAddModal, setShowAddModal] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [selectedTable, setSelectedTable] = useState<BranchTable | null>(null);
+  const [editTable, setEditTable] = useState<BranchTable | null>(null);
+  const [editStaffId, setEditStaffId] = useState('');
+  const [editStatus, setEditStatus] = useState('active');
   const [tableNumber, setTableNumber] = useState('');
   const [assignedStaffId, setAssignedStaffId] = useState('');
   const queryClient = useQueryClient();
