@@ -217,9 +217,14 @@ const BranchStaff = () => {
                           </Badge>
                         </td>
                         <td className="p-3">
-                          <Button variant="ghost" size="sm" onClick={() => toggleActive.mutate({ userId: sr.user_id, isActive: !!profile?.is_active })}>
-                            <UserX className="h-3 w-3" />
-                          </Button>
+                          <div className="flex gap-1">
+                            <Button variant="ghost" size="sm" onClick={() => openEdit(sr)}>
+                              <Pencil className="h-3 w-3" />
+                            </Button>
+                            <Button variant="ghost" size="sm" onClick={() => toggleActive.mutate({ userId: sr.user_id, isActive: !!profile?.is_active })}>
+                              <UserX className="h-3 w-3" />
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     );
