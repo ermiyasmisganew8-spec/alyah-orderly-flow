@@ -429,8 +429,77 @@ const LandingPage = () => {
         </div>
       </section>
 
+      {/* Contact Section */}
+      <section ref={contactRef} className="py-16 px-4 sm:px-6 bg-background">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl font-display font-bold text-center mb-3">Get in Touch</h2>
+          <p className="text-muted-foreground text-center mb-12">We'd love to hear from you. Send us a message or visit our office.</p>
+          <div className="grid lg:grid-cols-2 gap-8">
+            <Card className="shadow-card border-0">
+              <CardContent className="p-6">
+                <h3 className="font-display text-lg font-semibold mb-4">Send us a message</h3>
+                <form onSubmit={handleContactSubmit} className="space-y-4">
+                  <div>
+                    <Label>Name *</Label>
+                    <Input value={contactForm.name} onChange={e => setContactForm(f => ({ ...f, name: e.target.value }))} required maxLength={100} />
+                  </div>
+                  <div>
+                    <Label>Email *</Label>
+                    <Input type="email" value={contactForm.email} onChange={e => setContactForm(f => ({ ...f, email: e.target.value }))} required maxLength={255} />
+                  </div>
+                  <div>
+                    <Label>Message *</Label>
+                    <Textarea value={contactForm.message} onChange={e => setContactForm(f => ({ ...f, message: e.target.value }))} required rows={5} maxLength={1000} />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={contactSubmitting}>
+                    {contactSubmitting ? 'Sending...' : 'Send Message'}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+            <div className="space-y-4">
+              <Card className="shadow-card border-0">
+                <CardContent className="p-6 space-y-4">
+                  <h3 className="font-display text-lg font-semibold">Reach us</h3>
+                  <div className="flex items-start gap-3">
+                    <MapPin className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-sm font-semibold">Alyah HQ</p>
+                      <p className="text-sm text-muted-foreground">Bole Road, Addis Ababa, Ethiopia</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Phone className="h-5 w-5 text-primary shrink-0" />
+                    <p className="text-sm">+251 911 123 456</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Mail className="h-5 w-5 text-primary shrink-0" />
+                    <p className="text-sm">info@alyahmenu.com</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Clock className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                    <div className="text-sm">
+                      <p>Mon – Fri: 9:00 AM – 6:00 PM</p>
+                      <p>Sat: 10:00 AM – 2:00 PM</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="shadow-card border-0 overflow-hidden">
+                <iframe
+                  title="Alyah HQ Location"
+                  src="https://www.openstreetmap.org/export/embed.html?bbox=38.74%2C8.99%2C38.80%2C9.03&layer=mapnik"
+                  className="w-full h-56 border-0"
+                  loading="lazy"
+                />
+              </Card>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
-      <footer ref={contactRef} className="py-12 px-4 sm:px-6 bg-gray-900 text-gray-300">
+      <footer className="py-12 px-4 sm:px-6 bg-gray-900 text-gray-300">
         <div className="max-w-7xl mx-auto grid sm:grid-cols-4 gap-8">
           <div>
             <span className="font-display text-lg font-bold text-orange-300">Alyah Menu</span>
