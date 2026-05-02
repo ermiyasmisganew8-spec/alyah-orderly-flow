@@ -111,9 +111,47 @@ const BranchStaff = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['branch-staff'] });
+      queryClient.invalidateQueries({ queryKey: ['branch-staff-profiles'] });
       toast.success('Staff status updated');
     },
   });
+
+  const editStaff = useMutation({
+    mutationFn: async () => {
+      if (!editingId) return;
+      const { error: pErr } = await supabase
+        .from('profiles')
+        .update({ full_name: editForm.full_name, phone: editForm.phone, is_active: editForm.is_active })
+        .eq('user_id', editingId);
+      if (pErr) throw pErr;
+      const { error: rErr } = await supabase
+        .from('user_roles')
+        .update({ staff_position: editForm.staff_position })
+        .eq('user_id', editingId)
+        .eq('role', 'staff');
+      if (rErr) throw rErr;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['branch-staff'] });
+      queryClient.invalidateQueries({ queryKey: ['branch-staff-profiles'] });
+      toast.success('Staff updated');
+      setEditOpen(false);
+      setEditingId(null);
+    },
+    onError: (err: any) => toast.error(err.message || 'Failed to update'),
+  });
+
+  const openEdit = (sr: any) => {
+    const profile = profileFor(sr.user_id);
+    setEditingId(sr.user_id);
+    setEditForm({
+      full_name: profile?.full_name || '',
+      phone: profile?.phone || '',
+      staff_position: sr.staff_position || 'waiter',
+      is_active: !!profile?.is_active,
+    });
+    setEditOpen(true);
+  };
 
   return (
     <TooltipProvider>
