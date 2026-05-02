@@ -117,6 +117,31 @@ const TableManagement = () => {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['branch_tables', branchId] }),
   });
 
+  const editTableMutation = useMutation({
+    mutationFn: async () => {
+      if (!editTable) return;
+      const { error } = await supabase
+        .from('branch_tables')
+        .update({ assigned_staff_id: editStaffId || null, status: editStatus })
+        .eq('id', editTable.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['branch_tables', branchId] });
+      toast.success('Table updated');
+      setShowEditModal(false);
+      setEditTable(null);
+    },
+    onError: (err: any) => toast.error(err.message || 'Failed to update'),
+  });
+
+  const openEdit = (table: BranchTable) => {
+    setEditTable(table);
+    setEditStaffId(table.assigned_staff_id || '');
+    setEditStatus(table.status);
+    setShowEditModal(true);
+  };
+
   const downloadQRCode = (table: BranchTable) => {
     const qrElement = document.getElementById(`qr-${table.id}`);
     const canvas = qrElement?.querySelector('canvas');
