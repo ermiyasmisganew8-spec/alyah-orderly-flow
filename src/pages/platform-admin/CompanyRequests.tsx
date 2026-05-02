@@ -139,6 +139,7 @@ const CompanyRequests = () => {
                 <tr className="border-b text-left" style={{ borderColor: 'hsl(222, 30%, 18%)', color: 'hsl(210, 15%, 55%)' }}>
                   <th className="p-3">Restaurant</th><th className="p-3">Owner</th><th className="p-3">Email</th>
                   <th className="p-3">Phone</th><th className="p-3">Plan</th><th className="p-3">Cycle</th>
+                  <th className="p-3">Pay Method</th>
                   <th className="p-3">Payment</th><th className="p-3">Status</th><th className="p-3">Actions</th>
                 </tr>
               </thead>
