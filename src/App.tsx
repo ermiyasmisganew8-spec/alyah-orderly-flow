@@ -123,6 +123,7 @@ const App = () => (
               <Route path="info" element={<CompanyInfo />} />
               <Route path="branding" element={<BrandingSettings />} />
               <Route path="settings" element={<CompanySettings />} />
+              <Route path="profile" element={<UserProfile title="Company Admin Profile" />} />
             </Route>
 
             {/* Platform Admin */}
