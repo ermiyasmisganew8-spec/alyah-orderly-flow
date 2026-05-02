@@ -187,7 +187,7 @@ const CompanyRequests = () => {
                   </tr>
                 ))}
                 {(!requests || requests.length === 0) && (
-                  <tr><td colSpan={9} className="p-6 text-center" style={{ color: 'hsl(210, 15%, 45%)' }}>
+                  <tr><td colSpan={10} className="p-6 text-center" style={{ color: 'hsl(210, 15%, 45%)' }}>
                     <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" /> No requests yet
                   </td></tr>
                 )}
