@@ -153,6 +153,13 @@ const CompanyRequests = () => {
                     <td className="p-3 capitalize">{r.preferred_plan}</td>
                     <td className="p-3 capitalize">{r.billing_cycle || 'monthly'}</td>
                     <td className="p-3">
+                      {r.payment_method ? (
+                        <Badge variant="outline" className="uppercase">{r.payment_method === 'cbe' ? 'CBE' : 'Telebirr'}</Badge>
+                      ) : (
+                        <span style={{ color: 'hsl(210, 15%, 45%)' }}>—</span>
+                      )}
+                    </td>
+                    <td className="p-3">
                       <Badge variant={r.payment_status === 'paid' ? 'default' : 'secondary'} className="capitalize">
                         {r.payment_status || 'pending'}
                       </Badge>
