@@ -246,6 +246,40 @@ const BranchStaff = () => {
             </div>
           </CardContent>
         </Card>
+
+        <Dialog open={editOpen} onOpenChange={setEditOpen}>
+          <DialogContent>
+            <DialogHeader><DialogTitle>Edit Staff Member</DialogTitle></DialogHeader>
+            <form onSubmit={(e) => { e.preventDefault(); editStaff.mutate(); }} className="space-y-4">
+              <div><Label>Full Name</Label><Input value={editForm.full_name} onChange={e => setEditForm(f => ({ ...f, full_name: e.target.value }))} required /></div>
+              <div><Label>Phone</Label><Input value={editForm.phone} onChange={e => setEditForm(f => ({ ...f, phone: e.target.value }))} /></div>
+              <div>
+                <Label>Position</Label>
+                <Select value={editForm.staff_position} onValueChange={v => setEditForm(f => ({ ...f, staff_position: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="waiter">Waiter</SelectItem>
+                    <SelectItem value="chief">Chief</SelectItem>
+                    <SelectItem value="manager">Manager</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Status</Label>
+                <Select value={editForm.is_active ? 'active' : 'inactive'} onValueChange={v => setEditForm(f => ({ ...f, is_active: v === 'active' }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button type="submit" className="w-full" disabled={editStaff.isPending}>
+                {editStaff.isPending ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </TooltipProvider>
   );
