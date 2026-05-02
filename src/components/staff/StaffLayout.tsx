@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCompanyName } from '@/hooks/useCompanyName';
 import { supabase } from '@/integrations/supabase/client';
 import { NavLink } from '@/components/NavLink';
-import { ChefHat, Settings, LogOut, LayoutDashboard, Coins } from 'lucide-react';
+import { ChefHat, Settings, LogOut, LayoutDashboard, Coins, User } from 'lucide-react';
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger,
