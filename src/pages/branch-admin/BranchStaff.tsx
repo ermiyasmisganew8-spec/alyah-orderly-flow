@@ -22,6 +22,9 @@ const BranchStaff = () => {
   const { branchId, companyId } = useAuth();
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({ full_name: '', phone: '', staff_position: 'waiter', is_active: true });
   const [form, setForm] = useState({ full_name: '', email: '', phone: '', password: '', staff_position: 'waiter' });
   const [staffCreds, setStaffCreds] = useState<Record<string, StaffCred>>({});
 
