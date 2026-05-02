@@ -61,6 +61,7 @@ import GlobalSettings from "@/pages/platform-admin/GlobalSettings";
 import SecurityLogs from "@/pages/platform-admin/SecurityLogs";
 import PackagesManagement from "@/pages/platform-admin/PackagesManagement";
 import PlatformProfile from "@/pages/platform-admin/PlatformProfile";
+import UserProfile from "@/pages/shared/UserProfile";
 
 const queryClient = new QueryClient();
 
