@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Plus, Download, QrCode, Trash2 } from 'lucide-react';
+import { Plus, Download, QrCode, Trash2, Pencil } from 'lucide-react';
 import { QRCodeCanvas } from 'qrcode.react';
 
 
@@ -31,7 +31,11 @@ const TableManagement = () => {
   const { branchId, companyId } = useAuth();
   const [showAddModal, setShowAddModal] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [selectedTable, setSelectedTable] = useState<BranchTable | null>(null);
+  const [editTable, setEditTable] = useState<BranchTable | null>(null);
+  const [editStaffId, setEditStaffId] = useState('');
+  const [editStatus, setEditStatus] = useState('active');
   const [tableNumber, setTableNumber] = useState('');
   const [assignedStaffId, setAssignedStaffId] = useState('');
   const queryClient = useQueryClient();
@@ -113,6 +117,31 @@ const TableManagement = () => {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['branch_tables', branchId] }),
   });
 
+  const editTableMutation = useMutation({
+    mutationFn: async () => {
+      if (!editTable) return;
+      const { error } = await supabase
+        .from('branch_tables')
+        .update({ assigned_staff_id: editStaffId || null, status: editStatus })
+        .eq('id', editTable.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['branch_tables', branchId] });
+      toast.success('Table updated');
+      setShowEditModal(false);
+      setEditTable(null);
+    },
+    onError: (err: any) => toast.error(err.message || 'Failed to update'),
+  });
+
+  const openEdit = (table: BranchTable) => {
+    setEditTable(table);
+    setEditStaffId(table.assigned_staff_id || '');
+    setEditStatus(table.status);
+    setShowEditModal(true);
+  };
+
   const downloadQRCode = (table: BranchTable) => {
     const qrElement = document.getElementById(`qr-${table.id}`);
     const canvas = qrElement?.querySelector('canvas');
@@ -166,6 +195,9 @@ const TableManagement = () => {
                     </button>
                   </TableCell>
                   <TableCell className="space-x-2">
+                    <Button size="sm" variant="outline" onClick={() => openEdit(table)}>
+                      <Pencil className="h-4 w-4" />
+                    </Button>
                     <Button size="sm" variant="outline" onClick={() => { setSelectedTable(table); setShowQRModal(true); }}>
                       <QrCode className="h-4 w-4" />
                     </Button>
@@ -230,6 +262,39 @@ const TableManagement = () => {
               </Button>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Table {editTable?.table_number}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Assigned Waitress</Label>
+              <Select value={editStaffId || 'none'} onValueChange={v => setEditStaffId(v === 'none' ? '' : v)}>
+                <SelectTrigger><SelectValue placeholder="Unassigned" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Unassigned</SelectItem>
+                  {staff.map(s => (<SelectItem key={s.id} value={s.id}>{s.full_name}</SelectItem>))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Status</Label>
+              <Select value={editStatus} onValueChange={setEditStatus}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <Button className="w-full" onClick={() => editTableMutation.mutate()} disabled={editTableMutation.isPending}>
+              {editTableMutation.isPending ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

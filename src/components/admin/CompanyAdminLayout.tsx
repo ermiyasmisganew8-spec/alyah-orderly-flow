@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCompanyName } from '@/hooks/useCompanyName';
 import { Button } from '@/components/ui/button';
 import {
-  LayoutDashboard, Users, Shield, Building2, Settings, Menu, X, LogOut, FileText, Palette
+  LayoutDashboard, Users, Shield, Building2, Settings, Menu, X, LogOut, FileText, Palette, User
 } from 'lucide-react';
 
 const sidebarItems = [
@@ -14,6 +14,7 @@ const sidebarItems = [
   { icon: Building2, label: 'Branch Management', path: '/company-admin/branches' },
   { icon: FileText, label: 'Company Info', path: '/company-admin/info' },
   { icon: Palette, label: 'Branding', path: '/company-admin/branding' },
+  { icon: User, label: 'Profile', path: '/company-admin/profile' },
   { icon: Settings, label: 'Settings', path: '/company-admin/settings' },
 ];
 

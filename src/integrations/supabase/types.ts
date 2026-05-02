@@ -144,6 +144,7 @@ export type Database = {
           notes: string | null
           owner_name: string
           package_id: string | null
+          payment_method: string | null
           payment_status: string
           phone: string
           preferred_plan: string
@@ -160,6 +161,7 @@ export type Database = {
           notes?: string | null
           owner_name: string
           package_id?: string | null
+          payment_method?: string | null
           payment_status?: string
           phone: string
           preferred_plan?: string
@@ -176,6 +178,7 @@ export type Database = {
           notes?: string | null
           owner_name?: string
           package_id?: string | null
+          payment_method?: string | null
           payment_status?: string
           phone?: string
           preferred_plan?: string
@@ -192,6 +195,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      contact_messages: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          is_read: boolean
+          message: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          is_read?: boolean
+          message: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          is_read?: boolean
+          message?: string
+          name?: string
+        }
+        Relationships: []
       }
       feedback: {
         Row: {

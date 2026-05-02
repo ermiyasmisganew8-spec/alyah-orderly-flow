@@ -11,7 +11,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Plus, UserX } from 'lucide-react';
+import { Plus, UserX, Pencil } from 'lucide-react';
 
 interface StaffCred {
   email: string;
@@ -22,6 +22,9 @@ const BranchStaff = () => {
   const { branchId, companyId } = useAuth();
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({ full_name: '', phone: '', staff_position: 'waiter', is_active: true });
   const [form, setForm] = useState({ full_name: '', email: '', phone: '', password: '', staff_position: 'waiter' });
   const [staffCreds, setStaffCreds] = useState<Record<string, StaffCred>>({});
 
@@ -108,9 +111,47 @@ const BranchStaff = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['branch-staff'] });
+      queryClient.invalidateQueries({ queryKey: ['branch-staff-profiles'] });
       toast.success('Staff status updated');
     },
   });
+
+  const editStaff = useMutation({
+    mutationFn: async () => {
+      if (!editingId) return;
+      const { error: pErr } = await supabase
+        .from('profiles')
+        .update({ full_name: editForm.full_name, phone: editForm.phone, is_active: editForm.is_active })
+        .eq('user_id', editingId);
+      if (pErr) throw pErr;
+      const { error: rErr } = await supabase
+        .from('user_roles')
+        .update({ staff_position: editForm.staff_position })
+        .eq('user_id', editingId)
+        .eq('role', 'staff');
+      if (rErr) throw rErr;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['branch-staff'] });
+      queryClient.invalidateQueries({ queryKey: ['branch-staff-profiles'] });
+      toast.success('Staff updated');
+      setEditOpen(false);
+      setEditingId(null);
+    },
+    onError: (err: any) => toast.error(err.message || 'Failed to update'),
+  });
+
+  const openEdit = (sr: any) => {
+    const profile = profileFor(sr.user_id);
+    setEditingId(sr.user_id);
+    setEditForm({
+      full_name: profile?.full_name || '',
+      phone: profile?.phone || '',
+      staff_position: sr.staff_position || 'waiter',
+      is_active: !!profile?.is_active,
+    });
+    setEditOpen(true);
+  };
 
   return (
     <TooltipProvider>
@@ -176,9 +217,14 @@ const BranchStaff = () => {
                           </Badge>
                         </td>
                         <td className="p-3">
-                          <Button variant="ghost" size="sm" onClick={() => toggleActive.mutate({ userId: sr.user_id, isActive: !!profile?.is_active })}>
-                            <UserX className="h-3 w-3" />
-                          </Button>
+                          <div className="flex gap-1">
+                            <Button variant="ghost" size="sm" onClick={() => openEdit(sr)}>
+                              <Pencil className="h-3 w-3" />
+                            </Button>
+                            <Button variant="ghost" size="sm" onClick={() => toggleActive.mutate({ userId: sr.user_id, isActive: !!profile?.is_active })}>
+                              <UserX className="h-3 w-3" />
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -200,6 +246,40 @@ const BranchStaff = () => {
             </div>
           </CardContent>
         </Card>
+
+        <Dialog open={editOpen} onOpenChange={setEditOpen}>
+          <DialogContent>
+            <DialogHeader><DialogTitle>Edit Staff Member</DialogTitle></DialogHeader>
+            <form onSubmit={(e) => { e.preventDefault(); editStaff.mutate(); }} className="space-y-4">
+              <div><Label>Full Name</Label><Input value={editForm.full_name} onChange={e => setEditForm(f => ({ ...f, full_name: e.target.value }))} required /></div>
+              <div><Label>Phone</Label><Input value={editForm.phone} onChange={e => setEditForm(f => ({ ...f, phone: e.target.value }))} /></div>
+              <div>
+                <Label>Position</Label>
+                <Select value={editForm.staff_position} onValueChange={v => setEditForm(f => ({ ...f, staff_position: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="waiter">Waiter</SelectItem>
+                    <SelectItem value="chief">Chief</SelectItem>
+                    <SelectItem value="manager">Manager</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Status</Label>
+                <Select value={editForm.is_active ? 'active' : 'inactive'} onValueChange={v => setEditForm(f => ({ ...f, is_active: v === 'active' }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button type="submit" className="w-full" disabled={editStaff.isPending}>
+                {editStaff.isPending ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </TooltipProvider>
   );

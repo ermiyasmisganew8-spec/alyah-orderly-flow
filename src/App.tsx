@@ -61,6 +61,7 @@ import GlobalSettings from "@/pages/platform-admin/GlobalSettings";
 import SecurityLogs from "@/pages/platform-admin/SecurityLogs";
 import PackagesManagement from "@/pages/platform-admin/PackagesManagement";
 import PlatformProfile from "@/pages/platform-admin/PlatformProfile";
+import UserProfile from "@/pages/shared/UserProfile";
 
 const queryClient = new QueryClient();
 
@@ -95,6 +96,7 @@ const App = () => (
               <Route index element={<StaffDashboardContent />} />
               <Route path="tips" element={<StaffTips />} />
               <Route path="tips-overview" element={<StaffTipsOverview />} />
+              <Route path="profile" element={<UserProfile title="My Profile" />} />
               <Route path="settings" element={<StaffSettings />} />
             </Route>
 
@@ -109,6 +111,7 @@ const App = () => (
               <Route path="staff" element={<BranchStaff />} />
               <Route path="feedback" element={<BranchFeedback />} />
               <Route path="settings" element={<BranchSettings />} />
+              <Route path="profile" element={<UserProfile title="Branch Admin Profile" />} />
             </Route>
 
             {/* Company Admin */}
@@ -120,6 +123,7 @@ const App = () => (
               <Route path="info" element={<CompanyInfo />} />
               <Route path="branding" element={<BrandingSettings />} />
               <Route path="settings" element={<CompanySettings />} />
+              <Route path="profile" element={<UserProfile title="Company Admin Profile" />} />
             </Route>
 
             {/* Platform Admin */}

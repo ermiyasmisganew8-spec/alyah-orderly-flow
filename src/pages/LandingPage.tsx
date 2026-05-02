@@ -37,7 +37,10 @@ const LandingPage = () => {
   const [form, setForm] = useState({
     restaurant_name: '', owner_name: '', email: '', phone: '',
     branch_count: '1', package_id: '', billing_cycle: 'monthly', notes: '',
+    payment_method: 'telebirr',
   });
+  const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
+  const [contactSubmitting, setContactSubmitting] = useState(false);
 
   useEffect(() => {
     supabase.from('packages').select('*').eq('is_active', true).order('display_order')
@@ -81,16 +84,32 @@ const LandingPage = () => {
         billing_cycle: form.billing_cycle,
         preferred_plan: selectedPkg?.name?.toLowerCase() || 'basic',
         payment_status: 'pending',
+        payment_method: form.payment_method,
       };
       const { error } = await supabase.from('company_requests' as any).insert(payload);
       if (error) throw error;
       toast.success('Request submitted! We will contact you soon.');
       setRegisterModal(false);
-      setForm({ restaurant_name: '', owner_name: '', email: '', phone: '', branch_count: '1', package_id: '', billing_cycle: 'monthly', notes: '' });
+      setForm({ restaurant_name: '', owner_name: '', email: '', phone: '', branch_count: '1', package_id: '', billing_cycle: 'monthly', notes: '', payment_method: 'telebirr' });
     } catch (err: any) {
       toast.error(err.message || 'Submission failed');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setContactSubmitting(true);
+    try {
+      const { error } = await supabase.from('contact_messages' as any).insert(contactForm);
+      if (error) throw error;
+      toast.success('Message sent! We will get back to you shortly.');
+      setContactForm({ name: '', email: '', message: '' });
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to send message');
+    } finally {
+      setContactSubmitting(false);
     }
   };
 
@@ -344,6 +363,30 @@ const LandingPage = () => {
                 })}
               </div>
             </div>
+            <div>
+              <Label>Payment Method *</Label>
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                {[
+                  { value: 'telebirr', label: 'Telebirr' },
+                  { value: 'cbe', label: 'CBE' },
+                ].map(opt => {
+                  const selected = form.payment_method === opt.value;
+                  return (
+                    <button
+                      type="button"
+                      key={opt.value}
+                      onClick={() => setForm(f => ({ ...f, payment_method: opt.value }))}
+                      className={`p-3 rounded-lg border text-sm font-medium transition-all ${
+                        selected ? 'border-primary bg-primary/10 ring-2 ring-primary' : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Mock — actual payment processed offline after approval.</p>
+            </div>
             <div><Label>Additional Notes</Label><Textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={3} /></div>
             <Button type="submit" className="w-full" disabled={submitting || !form.package_id}>
               {submitting ? 'Submitting...' : 'Submit Request'}
@@ -386,8 +429,77 @@ const LandingPage = () => {
         </div>
       </section>
 
+      {/* Contact Section */}
+      <section ref={contactRef} className="py-16 px-4 sm:px-6 bg-background">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl font-display font-bold text-center mb-3">Get in Touch</h2>
+          <p className="text-muted-foreground text-center mb-12">We'd love to hear from you. Send us a message or visit our office.</p>
+          <div className="grid lg:grid-cols-2 gap-8">
+            <Card className="shadow-card border-0">
+              <CardContent className="p-6">
+                <h3 className="font-display text-lg font-semibold mb-4">Send us a message</h3>
+                <form onSubmit={handleContactSubmit} className="space-y-4">
+                  <div>
+                    <Label>Name *</Label>
+                    <Input value={contactForm.name} onChange={e => setContactForm(f => ({ ...f, name: e.target.value }))} required maxLength={100} />
+                  </div>
+                  <div>
+                    <Label>Email *</Label>
+                    <Input type="email" value={contactForm.email} onChange={e => setContactForm(f => ({ ...f, email: e.target.value }))} required maxLength={255} />
+                  </div>
+                  <div>
+                    <Label>Message *</Label>
+                    <Textarea value={contactForm.message} onChange={e => setContactForm(f => ({ ...f, message: e.target.value }))} required rows={5} maxLength={1000} />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={contactSubmitting}>
+                    {contactSubmitting ? 'Sending...' : 'Send Message'}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+            <div className="space-y-4">
+              <Card className="shadow-card border-0">
+                <CardContent className="p-6 space-y-4">
+                  <h3 className="font-display text-lg font-semibold">Reach us</h3>
+                  <div className="flex items-start gap-3">
+                    <MapPin className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-sm font-semibold">Alyah HQ</p>
+                      <p className="text-sm text-muted-foreground">Bole Road, Addis Ababa, Ethiopia</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Phone className="h-5 w-5 text-primary shrink-0" />
+                    <p className="text-sm">+251 911 123 456</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Mail className="h-5 w-5 text-primary shrink-0" />
+                    <p className="text-sm">info@alyahmenu.com</p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Clock className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                    <div className="text-sm">
+                      <p>Mon – Fri: 9:00 AM – 6:00 PM</p>
+                      <p>Sat: 10:00 AM – 2:00 PM</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="shadow-card border-0 overflow-hidden">
+                <iframe
+                  title="Alyah HQ Location"
+                  src="https://www.openstreetmap.org/export/embed.html?bbox=38.74%2C8.99%2C38.80%2C9.03&layer=mapnik"
+                  className="w-full h-56 border-0"
+                  loading="lazy"
+                />
+              </Card>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
-      <footer ref={contactRef} className="py-12 px-4 sm:px-6 bg-gray-900 text-gray-300">
+      <footer className="py-12 px-4 sm:px-6 bg-gray-900 text-gray-300">
         <div className="max-w-7xl mx-auto grid sm:grid-cols-4 gap-8">
           <div>
             <span className="font-display text-lg font-bold text-orange-300">Alyah Menu</span>

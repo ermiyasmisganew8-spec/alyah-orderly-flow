@@ -139,6 +139,7 @@ const CompanyRequests = () => {
                 <tr className="border-b text-left" style={{ borderColor: 'hsl(222, 30%, 18%)', color: 'hsl(210, 15%, 55%)' }}>
                   <th className="p-3">Restaurant</th><th className="p-3">Owner</th><th className="p-3">Email</th>
                   <th className="p-3">Phone</th><th className="p-3">Plan</th><th className="p-3">Cycle</th>
+                  <th className="p-3">Pay Method</th>
                   <th className="p-3">Payment</th><th className="p-3">Status</th><th className="p-3">Actions</th>
                 </tr>
               </thead>
@@ -151,6 +152,13 @@ const CompanyRequests = () => {
                     <td className="p-3" style={{ color: 'hsl(210, 15%, 55%)' }}>{r.phone}</td>
                     <td className="p-3 capitalize">{r.preferred_plan}</td>
                     <td className="p-3 capitalize">{r.billing_cycle || 'monthly'}</td>
+                    <td className="p-3">
+                      {r.payment_method ? (
+                        <Badge variant="outline" className="uppercase">{r.payment_method === 'cbe' ? 'CBE' : 'Telebirr'}</Badge>
+                      ) : (
+                        <span style={{ color: 'hsl(210, 15%, 45%)' }}>—</span>
+                      )}
+                    </td>
                     <td className="p-3">
                       <Badge variant={r.payment_status === 'paid' ? 'default' : 'secondary'} className="capitalize">
                         {r.payment_status || 'pending'}
@@ -179,7 +187,7 @@ const CompanyRequests = () => {
                   </tr>
                 ))}
                 {(!requests || requests.length === 0) && (
-                  <tr><td colSpan={9} className="p-6 text-center" style={{ color: 'hsl(210, 15%, 45%)' }}>
+                  <tr><td colSpan={10} className="p-6 text-center" style={{ color: 'hsl(210, 15%, 45%)' }}>
                     <Clock className="h-8 w-8 mx-auto mb-2 opacity-50" /> No requests yet
                   </td></tr>
                 )}
