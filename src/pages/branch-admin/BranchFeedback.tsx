@@ -13,6 +13,9 @@ const BranchFeedback = () => {
   const { branchId } = useAuth();
   const queryClient = useQueryClient();
   const [staffFilter, setStaffFilter] = useState<string>('all');
+  const [periodFilter, setPeriodFilter] = useState<'all' | 'today' | 'week' | 'month'>('all');
+  const [ratingFilter, setRatingFilter] = useState<'all' | '5' | '4' | 'low'>('all');
+  const [sortBy, setSortBy] = useState<'date_desc' | 'date_asc' | 'tip_desc' | 'name_asc'>('date_desc');
 
   const { data: feedbackList } = useQuery({
     queryKey: ['feedback', branchId],
