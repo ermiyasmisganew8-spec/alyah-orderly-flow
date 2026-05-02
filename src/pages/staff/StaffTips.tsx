@@ -7,6 +7,15 @@ import { Coins, Wallet, Info } from 'lucide-react';
 const StaffTips = () => {
   const { user } = useAuth();
 
+  const { data: profile } = useQuery({
+    queryKey: ['staff-profile', user?.id],
+    queryFn: async () => {
+      const { data } = await supabase.from('profiles').select('full_name, email').eq('user_id', user!.id).maybeSingle();
+      return data;
+    },
+    enabled: !!user,
+  });
+
   const { data: tips, isLoading } = useQuery({
     queryKey: ['staff-tips', user?.id],
     queryFn: async () => {
@@ -27,9 +36,12 @@ const StaffTips = () => {
   const todayTotal = todayTips.reduce((s: number, t: any) => s + Number(t.tip_amount || 0), 0);
   const allTimeTotal = (tips || []).reduce((s: number, t: any) => s + Number(t.tip_amount || 0), 0);
 
+  const displayName = profile?.full_name || profile?.email?.split('@')[0] || 'there';
+
   return (
     <div className="max-w-3xl mx-auto">
-      <h1 className="text-2xl font-display font-bold mb-6">My Tips</h1>
+      <h1 className="text-2xl font-display font-bold mb-1">Welcome, {displayName}</h1>
+      <p className="text-sm text-muted-foreground mb-6">Here are your tips at a glance.</p>
 
       <div className="grid sm:grid-cols-2 gap-4 mb-6">
         <Card className="shadow-card border-0 bg-hero-gradient text-primary-foreground">
