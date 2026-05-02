@@ -111,6 +111,7 @@ const App = () => (
               <Route path="staff" element={<BranchStaff />} />
               <Route path="feedback" element={<BranchFeedback />} />
               <Route path="settings" element={<BranchSettings />} />
+              <Route path="profile" element={<UserProfile title="Branch Admin Profile" />} />
             </Route>
 
             {/* Company Admin */}
