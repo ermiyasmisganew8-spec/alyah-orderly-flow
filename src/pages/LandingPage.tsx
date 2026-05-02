@@ -363,6 +363,30 @@ const LandingPage = () => {
                 })}
               </div>
             </div>
+            <div>
+              <Label>Payment Method *</Label>
+              <div className="grid grid-cols-2 gap-2 mt-2">
+                {[
+                  { value: 'telebirr', label: 'Telebirr' },
+                  { value: 'cbe', label: 'CBE' },
+                ].map(opt => {
+                  const selected = form.payment_method === opt.value;
+                  return (
+                    <button
+                      type="button"
+                      key={opt.value}
+                      onClick={() => setForm(f => ({ ...f, payment_method: opt.value }))}
+                      className={`p-3 rounded-lg border text-sm font-medium transition-all ${
+                        selected ? 'border-primary bg-primary/10 ring-2 ring-primary' : 'border-border hover:border-primary/50'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Mock — actual payment processed offline after approval.</p>
+            </div>
             <div><Label>Additional Notes</Label><Textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={3} /></div>
             <Button type="submit" className="w-full" disabled={submitting || !form.package_id}>
               {submitting ? 'Submitting...' : 'Submit Request'}
