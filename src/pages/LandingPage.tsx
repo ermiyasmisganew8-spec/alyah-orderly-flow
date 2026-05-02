@@ -37,7 +37,10 @@ const LandingPage = () => {
   const [form, setForm] = useState({
     restaurant_name: '', owner_name: '', email: '', phone: '',
     branch_count: '1', package_id: '', billing_cycle: 'monthly', notes: '',
+    payment_method: 'telebirr',
   });
+  const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
+  const [contactSubmitting, setContactSubmitting] = useState(false);
 
   useEffect(() => {
     supabase.from('packages').select('*').eq('is_active', true).order('display_order')
