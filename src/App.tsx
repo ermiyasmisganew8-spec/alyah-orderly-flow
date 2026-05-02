@@ -96,6 +96,7 @@ const App = () => (
               <Route index element={<StaffDashboardContent />} />
               <Route path="tips" element={<StaffTips />} />
               <Route path="tips-overview" element={<StaffTipsOverview />} />
+              <Route path="profile" element={<UserProfile title="My Profile" />} />
               <Route path="settings" element={<StaffSettings />} />
             </Route>
 
