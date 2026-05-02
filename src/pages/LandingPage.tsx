@@ -84,16 +84,32 @@ const LandingPage = () => {
         billing_cycle: form.billing_cycle,
         preferred_plan: selectedPkg?.name?.toLowerCase() || 'basic',
         payment_status: 'pending',
+        payment_method: form.payment_method,
       };
       const { error } = await supabase.from('company_requests' as any).insert(payload);
       if (error) throw error;
       toast.success('Request submitted! We will contact you soon.');
       setRegisterModal(false);
-      setForm({ restaurant_name: '', owner_name: '', email: '', phone: '', branch_count: '1', package_id: '', billing_cycle: 'monthly', notes: '' });
+      setForm({ restaurant_name: '', owner_name: '', email: '', phone: '', branch_count: '1', package_id: '', billing_cycle: 'monthly', notes: '', payment_method: 'telebirr' });
     } catch (err: any) {
       toast.error(err.message || 'Submission failed');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setContactSubmitting(true);
+    try {
+      const { error } = await supabase.from('contact_messages' as any).insert(contactForm);
+      if (error) throw error;
+      toast.success('Message sent! We will get back to you shortly.');
+      setContactForm({ name: '', email: '', message: '' });
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to send message');
+    } finally {
+      setContactSubmitting(false);
     }
   };
 
