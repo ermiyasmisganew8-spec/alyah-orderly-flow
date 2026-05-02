@@ -39,10 +39,12 @@ const StaffLayout = () => {
     ? [
         { title: 'Dashboard', url: '/staff', icon: LayoutDashboard },
         { title: 'Tips Overview', url: '/staff/tips-overview', icon: Coins },
+        { title: 'Profile', url: '/staff/profile', icon: User },
         { title: 'Settings', url: '/staff/settings', icon: Settings },
       ]
     : [
         { title: 'My Tips', url: '/staff/tips', icon: Coins },
+        { title: 'Profile', url: '/staff/profile', icon: User },
         { title: 'Settings', url: '/staff/settings', icon: Settings },
       ];
 
