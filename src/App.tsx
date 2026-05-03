@@ -110,7 +110,7 @@ const App = () => (
               <Route path="analytics" element={<BranchAnalytics />} />
               <Route path="staff" element={<BranchStaff />} />
               <Route path="feedback" element={<BranchFeedback />} />
-              <Route path="settings" element={<BranchSettings />} />
+              <Route path="settings" element={<UserProfile title="Settings" />} />
               <Route path="profile" element={<UserProfile title="Branch Admin Profile" />} />
             </Route>
 
