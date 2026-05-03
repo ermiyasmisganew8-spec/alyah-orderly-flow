@@ -54,7 +54,8 @@ const MenuManagement = () => {
         image_url: form.image_url || null,
         prep_time_minutes: parseInt(form.prep_time_minutes) || 15,
         is_available: form.is_available,
-      };
+        ingredients: form.ingredients || null,
+      } as any;
       if (editItem) {
         const { error } = await supabase.from('menu_items').update(payload).eq('id', editItem.id);
         if (error) throw error;
@@ -84,7 +85,7 @@ const MenuManagement = () => {
   });
 
   const resetForm = () => {
-    setForm({ name: '', description: '', category_id: '', price: '', image_url: '', prep_time_minutes: '15', is_available: true });
+    setForm({ name: '', description: '', category_id: '', price: '', image_url: '', prep_time_minutes: '15', is_available: true, ingredients: '' });
     setEditItem(null);
   };
 
@@ -98,6 +99,7 @@ const MenuManagement = () => {
       image_url: item.image_url || '',
       prep_time_minutes: String(item.prep_time_minutes || 15),
       is_available: item.is_available,
+      ingredients: item.ingredients || '',
     });
     setIsOpen(true);
   };
