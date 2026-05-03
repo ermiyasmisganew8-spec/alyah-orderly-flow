@@ -284,6 +284,17 @@ const CustomerOrderTracking = () => {
         </CardContent>
       </Card>
 
+      {/* Add more items while still pending */}
+      {order.status === 'pending' && (
+        <Button
+          variant="outline"
+          className="w-full mb-3"
+          onClick={() => navigate(`/b/${companyId}/${branchId}/menu?table=${tableNumber}`)}
+        >
+          + Add more items
+        </Button>
+      )}
+
       {/* Pay Button */}
       {order.status === 'served' && (
         <Button className="w-full" size="lg" onClick={() => setShowPayModal(true)}>
