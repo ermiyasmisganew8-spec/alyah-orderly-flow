@@ -13,7 +13,7 @@ export const useCompanyName = (companyId: string | null | undefined) => {
       return data?.name || 'Restaurant';
     },
     enabled: !!companyId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000,
   });
   return companyName || 'Restaurant';
 };
