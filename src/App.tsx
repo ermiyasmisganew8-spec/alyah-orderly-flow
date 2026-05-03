@@ -121,8 +121,8 @@ const App = () => (
               <Route path="permissions" element={<CompanyPermissions />} />
               <Route path="branches" element={<BranchManagement />} />
               <Route path="info" element={<CompanyInfo />} />
-              <Route path="branding" element={<BrandingSettings />} />
-              <Route path="settings" element={<CompanySettings />} />
+              <Route path="branding" element={<Navigate to="/company-admin/info" replace />} />
+              <Route path="settings" element={<UserProfile title="Settings" />} />
               <Route path="profile" element={<UserProfile title="Company Admin Profile" />} />
             </Route>
 
