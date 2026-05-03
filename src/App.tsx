@@ -97,7 +97,7 @@ const App = () => (
               <Route path="tips" element={<StaffTips />} />
               <Route path="tips-overview" element={<StaffTipsOverview />} />
               <Route path="profile" element={<UserProfile title="My Profile" />} />
-              <Route path="settings" element={<StaffSettings />} />
+              <Route path="settings" element={<UserProfile title="Settings" />} />
             </Route>
 
             {/* Branch Admin */}
@@ -110,7 +110,7 @@ const App = () => (
               <Route path="analytics" element={<BranchAnalytics />} />
               <Route path="staff" element={<BranchStaff />} />
               <Route path="feedback" element={<BranchFeedback />} />
-              <Route path="settings" element={<BranchSettings />} />
+              <Route path="settings" element={<UserProfile title="Settings" />} />
               <Route path="profile" element={<UserProfile title="Branch Admin Profile" />} />
             </Route>
 
@@ -121,8 +121,8 @@ const App = () => (
               <Route path="permissions" element={<CompanyPermissions />} />
               <Route path="branches" element={<BranchManagement />} />
               <Route path="info" element={<CompanyInfo />} />
-              <Route path="branding" element={<BrandingSettings />} />
-              <Route path="settings" element={<CompanySettings />} />
+              <Route path="branding" element={<Navigate to="/company-admin/info" replace />} />
+              <Route path="settings" element={<UserProfile title="Settings" />} />
               <Route path="profile" element={<UserProfile title="Company Admin Profile" />} />
             </Route>
 

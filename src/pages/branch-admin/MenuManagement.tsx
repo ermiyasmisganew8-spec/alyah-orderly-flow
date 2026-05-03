@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
@@ -22,7 +23,7 @@ const MenuManagement = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [form, setForm] = useState({
-    name: '', description: '', category_id: '', price: '', image_url: '', prep_time_minutes: '15', is_available: true,
+    name: '', description: '', category_id: '', price: '', image_url: '', prep_time_minutes: '15', is_available: true, ingredients: '',
   });
 
   const { data: categories } = useQuery({
@@ -54,7 +55,8 @@ const MenuManagement = () => {
         image_url: form.image_url || null,
         prep_time_minutes: parseInt(form.prep_time_minutes) || 15,
         is_available: form.is_available,
-      };
+        ingredients: form.ingredients || null,
+      } as any;
       if (editItem) {
         const { error } = await supabase.from('menu_items').update(payload).eq('id', editItem.id);
         if (error) throw error;
@@ -84,7 +86,7 @@ const MenuManagement = () => {
   });
 
   const resetForm = () => {
-    setForm({ name: '', description: '', category_id: '', price: '', image_url: '', prep_time_minutes: '15', is_available: true });
+    setForm({ name: '', description: '', category_id: '', price: '', image_url: '', prep_time_minutes: '15', is_available: true, ingredients: '' });
     setEditItem(null);
   };
 
@@ -98,6 +100,7 @@ const MenuManagement = () => {
       image_url: item.image_url || '',
       prep_time_minutes: String(item.prep_time_minutes || 15),
       is_available: item.is_available,
+      ingredients: item.ingredients || '',
     });
     setIsOpen(true);
   };
@@ -203,6 +206,26 @@ const MenuManagement = () => {
                     </span>
                   </label>
                 </div>
+                <div className="mt-3">
+                  <Label className="text-xs">Or paste an Image URL</Label>
+                  <Input
+                    type="url"
+                    placeholder="https://..."
+                    value={form.image_url}
+                    onChange={e => setForm(f => ({ ...f, image_url: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label>Ingredients</Label>
+                <Textarea
+                  rows={3}
+                  placeholder="e.g. Tomato, Onion, Garlic, Olive Oil, Basil"
+                  value={form.ingredients}
+                  onChange={e => setForm(f => ({ ...f, ingredients: e.target.value }))}
+                />
+                <p className="text-xs text-muted-foreground mt-1">Comma-separated list shown to customers.</p>
               </div>
 
               <div className="flex items-center gap-2">

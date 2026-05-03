@@ -65,8 +65,8 @@ const CustomerNav = ({ companyId, branchId, tableNumber, companyName, logoUrl }:
             )}
           </Link>
           {!user && (
-            <Link to={`${base}/login${tableParam}`}>
-              <Button variant="outline" size="sm"><User className="h-4 w-4 mr-1" /> Login</Button>
+            <Link to={`${base}/login${tableParam}&mode=signup`}>
+              <Button variant="outline" size="sm"><User className="h-4 w-4 mr-1" /> Sign Up</Button>
             </Link>
           )}
           <button className="md:hidden" onClick={() => setIsOpen(!isOpen)}>

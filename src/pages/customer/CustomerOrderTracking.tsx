@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, useOutletContext } from 'react-router-dom';
+import { useParams, useOutletContext, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useOrderTrackingRealtime } from '@/hooks/useOrderRealtime';
 import { useAuth } from '@/contexts/AuthContext';
@@ -17,6 +17,7 @@ import { CheckCircle, Clock, ChefHat, UtensilsCrossed, Star, MessageSquare, LogI
 import { clearStoredActiveOrder } from '@/hooks/useActiveOrder';
 
 interface OutletCtx {
+  companyId: string;
   branchId: string;
   tableNumber: number;
 }
@@ -30,9 +31,10 @@ const statusIcons: Record<string, React.ElementType> = {
 
 const CustomerOrderTracking = () => {
   const { orderId } = useParams<{ orderId: string }>();
-  const { branchId } = useOutletContext<OutletCtx>();
+  const { companyId, branchId, tableNumber } = useOutletContext<OutletCtx>();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const [feedbackItem, setFeedbackItem] = useState<{ id: string; name: string } | null>(null);
   const [rating, setRating] = useState(5);
@@ -281,6 +283,17 @@ const CustomerOrderTracking = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Add more items while still pending */}
+      {order.status === 'pending' && (
+        <Button
+          variant="outline"
+          className="w-full mb-3"
+          onClick={() => navigate(`/b/${companyId}/${branchId}/menu?table=${tableNumber}`)}
+        >
+          + Add more items
+        </Button>
+      )}
 
       {/* Pay Button */}
       {order.status === 'served' && (
