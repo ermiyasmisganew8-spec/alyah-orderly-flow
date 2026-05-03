@@ -31,9 +31,10 @@ const statusIcons: Record<string, React.ElementType> = {
 
 const CustomerOrderTracking = () => {
   const { orderId } = useParams<{ orderId: string }>();
-  const { branchId } = useOutletContext<OutletCtx>();
+  const { companyId, branchId, tableNumber } = useOutletContext<OutletCtx>();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const [feedbackItem, setFeedbackItem] = useState<{ id: string; name: string } | null>(null);
   const [rating, setRating] = useState(5);
