@@ -5,7 +5,7 @@ import { useCompanyName } from '@/hooks/useCompanyName';
 import { useBranchName } from '@/hooks/useBranchName';
 import { Button } from '@/components/ui/button';
 import {
-  LayoutDashboard, UtensilsCrossed, Tag, BarChart3, Users, MessageSquare, Settings, Menu, X, LogOut, QrCode, User
+  LayoutDashboard, UtensilsCrossed, Tag, BarChart3, Users, MessageSquare, Settings, Menu, X, LogOut, QrCode
 } from 'lucide-react';
 
 const sidebarItems = [
@@ -17,7 +17,6 @@ const sidebarItems = [
   { icon: BarChart3, label: 'Analytics', path: '/branch-admin/analytics' },
   { icon: Users, label: 'Staff', path: '/branch-admin/staff' },
   { icon: MessageSquare, label: 'Feedback', path: '/branch-admin/feedback' },
-  { icon: User, label: 'Profile', path: '/branch-admin/profile' },
   { icon: Settings, label: 'Settings', path: '/branch-admin/settings' },
 ];
 
