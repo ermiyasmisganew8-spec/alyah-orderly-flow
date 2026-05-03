@@ -97,7 +97,7 @@ const App = () => (
               <Route path="tips" element={<StaffTips />} />
               <Route path="tips-overview" element={<StaffTipsOverview />} />
               <Route path="profile" element={<UserProfile title="My Profile" />} />
-              <Route path="settings" element={<StaffSettings />} />
+              <Route path="settings" element={<UserProfile title="Settings" />} />
             </Route>
 
             {/* Branch Admin */}
