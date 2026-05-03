@@ -206,6 +206,26 @@ const MenuManagement = () => {
                     </span>
                   </label>
                 </div>
+                <div className="mt-3">
+                  <Label className="text-xs">Or paste an Image URL</Label>
+                  <Input
+                    type="url"
+                    placeholder="https://..."
+                    value={form.image_url}
+                    onChange={e => setForm(f => ({ ...f, image_url: e.target.value }))}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label>Ingredients</Label>
+                <Textarea
+                  rows={3}
+                  placeholder="e.g. Tomato, Onion, Garlic, Olive Oil, Basil"
+                  value={form.ingredients}
+                  onChange={e => setForm(f => ({ ...f, ingredients: e.target.value }))}
+                />
+                <p className="text-xs text-muted-foreground mt-1">Comma-separated list shown to customers.</p>
               </div>
 
               <div className="flex items-center gap-2">
