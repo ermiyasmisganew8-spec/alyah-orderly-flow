@@ -285,6 +285,7 @@ export type Database = {
           description: string | null
           id: string
           image_url: string | null
+          ingredients: string | null
           is_available: boolean
           modifiers: Json | null
           name: string
@@ -299,6 +300,7 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          ingredients?: string | null
           is_available?: boolean
           modifiers?: Json | null
           name: string
@@ -313,6 +315,7 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          ingredients?: string | null
           is_available?: boolean
           modifiers?: Json | null
           name?: string
