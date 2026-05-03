@@ -73,7 +73,7 @@ const StaffDashboardContent = () => {
         {order.status === 'preparing' && (
           <Button size="sm" className="w-full" onClick={() => updateStatus.mutate({ orderId: order.id, status: 'served' })}>Mark Served</Button>
         )}
-        {order.status !== 'paid' && order.status !== 'cancelled' && (
+        {(order.status === 'pending' || order.status === 'preparing') && (
           <Button
             size="sm"
             variant="outline"
