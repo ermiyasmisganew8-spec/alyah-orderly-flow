@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useOutletContext, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useOutletContext, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,7 +17,9 @@ const CustomerLogin = () => {
   const { companyId, branchId, tableNumber } = useOutletContext<OutletCtx>();
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [searchParams] = useSearchParams();
+  const [isSignUp, setIsSignUp] = useState(searchParams.get('mode') === 'signup');
+  useEffect(() => { setIsSignUp(searchParams.get('mode') === 'signup'); }, [searchParams]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
