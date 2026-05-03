@@ -150,6 +150,12 @@ const CustomerMenu = () => {
                 className="w-full h-48 object-cover rounded-lg"
               />
               <p className="text-sm text-muted-foreground">{selectedItem.description}</p>
+              {(selectedItem as any).ingredients && (
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-1">Ingredients</p>
+                  <p className="text-sm">{(selectedItem as any).ingredients}</p>
+                </div>
+              )}
               {selectedItem.prep_time_minutes && (
                 <Badge variant="secondary">~{selectedItem.prep_time_minutes} min prep</Badge>
               )}
