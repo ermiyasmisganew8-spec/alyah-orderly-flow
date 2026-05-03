@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, useOutletContext } from 'react-router-dom';
+import { useParams, useOutletContext, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useOrderTrackingRealtime } from '@/hooks/useOrderRealtime';
 import { useAuth } from '@/contexts/AuthContext';
