@@ -17,6 +17,7 @@ import { CheckCircle, Clock, ChefHat, UtensilsCrossed, Star, MessageSquare, LogI
 import { clearStoredActiveOrder } from '@/hooks/useActiveOrder';
 
 interface OutletCtx {
+  companyId: string;
   branchId: string;
   tableNumber: number;
 }
