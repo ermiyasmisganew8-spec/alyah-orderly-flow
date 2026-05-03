@@ -22,7 +22,7 @@ const CustomerLayout = () => {
       return data;
     },
     enabled: !!companyId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000,
   });
 
   const companyName = company?.name || 'Restaurant';
