@@ -41,15 +41,55 @@ const CustomerCart = () => {
 
       if (checkError) throw checkError;
 
+      // If there's an existing pending order at this table that belongs to this customer
+      // (or matches the stored guest order id), append items to it instead of creating a new order.
+      let existingOrderId: string | null = null;
       if (existing) {
-        // If this customer owns the active order, take them to it instead
         const ownsOrder = user && existing.customer_id === user.id;
-        if (ownsOrder) {
+        const guestOwns = !user && (() => {
+          try {
+            const map = JSON.parse(localStorage.getItem('alyah_active_orders') || '{}');
+            return map[branchId] === existing.id;
+          } catch { return false; }
+        })();
+
+        if (existing.status === 'pending' && (ownsOrder || guestOwns)) {
+          existingOrderId = existing.id;
+        } else if (ownsOrder) {
           toast.info('You already have an active order at this table.');
           navigate(`/b/${companyId}/${branchId}/order/${existing.id}?table=${tableNumber}`);
           return;
+        } else {
+          toast.error('This table is currently occupied. Please wait until the current order is completed or ask staff for assistance.');
+          return;
         }
-        toast.error('This table is currently occupied. Please wait until the current order is completed or ask staff for assistance.');
+      }
+
+      if (existingOrderId) {
+        // Append items to existing pending order
+        const orderItems = items.map(item => ({
+          order_id: existingOrderId!,
+          menu_item_id: item.id,
+          quantity: item.quantity,
+          unit_price: item.price,
+          subtotal: item.price * item.quantity,
+        }));
+        const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
+        if (itemsError) throw itemsError;
+
+        // Update total
+        const { data: existingOrder } = await supabase
+          .from('orders')
+          .select('total_amount')
+          .eq('id', existingOrderId)
+          .single();
+        const newTotal = Number(existingOrder?.total_amount || 0) + totalPrice;
+        await supabase.from('orders').update({ total_amount: newTotal }).eq('id', existingOrderId);
+
+        clearCart();
+        toast.success('Items added to your order!');
+        queryClient.invalidateQueries({ queryKey: ['order', existingOrderId] });
+        navigate(`/b/${companyId}/${branchId}/order/${existingOrderId}?table=${tableNumber}`);
         return;
       }
 
