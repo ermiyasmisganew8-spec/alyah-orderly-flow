@@ -22,7 +22,7 @@ const MenuManagement = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [form, setForm] = useState({
-    name: '', description: '', category_id: '', price: '', image_url: '', prep_time_minutes: '15', is_available: true,
+    name: '', description: '', category_id: '', price: '', image_url: '', prep_time_minutes: '15', is_available: true, ingredients: '',
   });
 
   const { data: categories } = useQuery({
