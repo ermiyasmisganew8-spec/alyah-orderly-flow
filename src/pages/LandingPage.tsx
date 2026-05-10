@@ -58,13 +58,30 @@ const LandingPage = () => {
     setMobileMenu(false);
   };
 
+  const branchLimitFor = (pkg?: Pkg) => {
+    const n = (pkg?.name || '').toLowerCase();
+    if (n.includes('premium')) return 5;
+    if (n.includes('standard')) return 3;
+    return 1;
+  };
+
   const openRegister = (packageId?: string) => {
-    if (packageId) {
-      setForm(f => ({ ...f, package_id: packageId, billing_cycle: yearly ? 'yearly' : 'monthly' }));
-    } else if (!form.package_id && packages[0]) {
-      setForm(f => ({ ...f, package_id: packages[0].id, billing_cycle: yearly ? 'yearly' : 'monthly' }));
+    const pkg = packages.find(p => p.id === packageId) || packages[0];
+    if (pkg) {
+      const limit = branchLimitFor(pkg);
+      setForm(f => ({
+        ...f,
+        package_id: pkg.id,
+        billing_cycle: yearly ? 'yearly' : 'monthly',
+        branch_count: limit === 1 ? '1' : f.branch_count && Number(f.branch_count) <= limit ? f.branch_count : '1',
+      }));
     }
     setRegisterModal(true);
+    setMobileMenu(false);
+  };
+
+  const scrollToPricing = () => {
+    pricingRef.current?.scrollIntoView({ behavior: 'smooth' });
     setMobileMenu(false);
   };
 
