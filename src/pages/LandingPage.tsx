@@ -337,85 +337,91 @@ const LandingPage = () => {
           <DialogHeader>
             <DialogTitle className="font-display text-xl">Request Access</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div><Label>Restaurant Name *</Label><Input value={form.restaurant_name} onChange={e => setForm(f => ({ ...f, restaurant_name: e.target.value }))} required /></div>
-            <div><Label>Owner Full Name *</Label><Input value={form.owner_name} onChange={e => setForm(f => ({ ...f, owner_name: e.target.value }))} required /></div>
-            <div className="grid grid-cols-2 gap-4">
-              <div><Label>Email *</Label><Input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required /></div>
-              <div><Label>Phone *</Label><Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} required /></div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div><Label>Number of Branches</Label>
-                <Select value={form.branch_count} onValueChange={v => setForm(f => ({ ...f, branch_count: v }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">1</SelectItem>
-                    <SelectItem value="2-5">2–5</SelectItem>
-                    <SelectItem value="6+">6+</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div><Label>Billing Cycle</Label>
-                <Select value={form.billing_cycle} onValueChange={v => setForm(f => ({ ...f, billing_cycle: v }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="monthly">Monthly</SelectItem>
-                    <SelectItem value="yearly">Yearly</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div>
-              <Label>Selected Package *</Label>
-              <div className="grid grid-cols-3 gap-2 mt-2">
-                {packages.map(p => {
-                  const price = form.billing_cycle === 'yearly' ? p.yearly_price : p.monthly_price;
-                  const selected = form.package_id === p.id;
-                  return (
-                    <button
-                      type="button"
-                      key={p.id}
-                      onClick={() => setForm(f => ({ ...f, package_id: p.id }))}
-                      className={`text-left p-3 rounded-lg border transition-all ${
-                        selected ? 'border-primary bg-primary/10 ring-2 ring-primary' : 'border-border hover:border-primary/50'
-                      }`}
-                    >
-                      <p className="font-semibold text-sm">{p.name}</p>
-                      <p className="text-xs text-primary font-bold">{price.toLocaleString()} ETB</p>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            <div>
-              <Label>Payment Method *</Label>
-              <div className="grid grid-cols-2 gap-2 mt-2">
-                {[
-                  { value: 'telebirr', label: 'Telebirr' },
-                  { value: 'cbe', label: 'CBE' },
-                ].map(opt => {
-                  const selected = form.payment_method === opt.value;
-                  return (
-                    <button
-                      type="button"
-                      key={opt.value}
-                      onClick={() => setForm(f => ({ ...f, payment_method: opt.value }))}
-                      className={`p-3 rounded-lg border text-sm font-medium transition-all ${
-                        selected ? 'border-primary bg-primary/10 ring-2 ring-primary' : 'border-border hover:border-primary/50'
-                      }`}
-                    >
-                      {opt.label}
-                    </button>
-                  );
-                })}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">Mock — actual payment processed offline after approval.</p>
-            </div>
-            <div><Label>Additional Notes</Label><Textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={3} /></div>
-            <Button type="submit" className="w-full" disabled={submitting || !form.package_id}>
-              {submitting ? 'Submitting...' : 'Submit Request'}
-            </Button>
-          </form>
+          {(() => {
+            const selectedPkg = packages.find(p => p.id === form.package_id);
+            const limit = branchLimitFor(selectedPkg);
+            const price = form.billing_cycle === 'yearly' ? selectedPkg?.yearly_price : selectedPkg?.monthly_price;
+            const cycleLabel = form.billing_cycle === 'yearly' ? '/yr' : '/mo';
+            return (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {selectedPkg && (
+                  <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-muted-foreground">You selected</p>
+                      <p className="font-display text-lg font-semibold">{selectedPkg.name} Plan</p>
+                      <p className="text-xs text-muted-foreground">Up to {limit} branch{limit > 1 ? 'es' : ''}</p>
+                    </div>
+                    {price !== undefined && (
+                      <p className="text-xl font-bold text-primary">{price.toLocaleString()} ETB<span className="text-xs font-normal text-muted-foreground">{cycleLabel}</span></p>
+                    )}
+                  </div>
+                )}
+                <div><Label>Restaurant Name *</Label><Input value={form.restaurant_name} onChange={e => setForm(f => ({ ...f, restaurant_name: e.target.value }))} required /></div>
+                <div><Label>Owner Full Name *</Label><Input value={form.owner_name} onChange={e => setForm(f => ({ ...f, owner_name: e.target.value }))} required /></div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div><Label>Email *</Label><Input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required /></div>
+                  <div><Label>Phone *</Label><Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} required /></div>
+                </div>
+                <div>
+                  <Label>Number of Branches * <span className="text-xs text-muted-foreground">(1–{limit})</span></Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={limit}
+                    value={form.branch_count}
+                    disabled={limit === 1}
+                    onChange={e => setForm(f => ({ ...f, branch_count: e.target.value }))}
+                    required
+                  />
+                  {limit === 1 && <p className="text-xs text-muted-foreground mt-1">Basic plan includes 1 branch.</p>}
+                  {Number(form.branch_count) > limit && (
+                    <p className="text-xs text-destructive mt-1">Maximum {limit} branch{limit > 1 ? 'es' : ''} for this plan.</p>
+                  )}
+                </div>
+                <div>
+                  <Label>Billing Cycle *</Label>
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    {[{ value: 'monthly', label: 'Monthly' }, { value: 'yearly', label: 'Yearly' }].map(opt => {
+                      const sel = form.billing_cycle === opt.value;
+                      return (
+                        <button
+                          type="button"
+                          key={opt.value}
+                          onClick={() => setForm(f => ({ ...f, billing_cycle: opt.value }))}
+                          className={`p-3 rounded-lg border text-sm font-medium transition-all ${sel ? 'border-primary bg-primary/10 ring-2 ring-primary' : 'border-border hover:border-primary/50'}`}
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div>
+                  <Label>Payment Method *</Label>
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    {[{ value: 'telebirr', label: 'Telebirr' }, { value: 'cbe', label: 'CBE' }].map(opt => {
+                      const sel = form.payment_method === opt.value;
+                      return (
+                        <button
+                          type="button"
+                          key={opt.value}
+                          onClick={() => setForm(f => ({ ...f, payment_method: opt.value }))}
+                          className={`p-3 rounded-lg border text-sm font-medium transition-all ${sel ? 'border-primary bg-primary/10 ring-2 ring-primary' : 'border-border hover:border-primary/50'}`}
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">Payment processed offline after approval.</p>
+                </div>
+                <div><Label>Additional Notes</Label><Textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={3} /></div>
+                <Button type="submit" className="w-full" disabled={submitting || !form.package_id || Number(form.branch_count) < 1 || Number(form.branch_count) > limit}>
+                  {submitting ? 'Submitting...' : 'Submit Request'}
+                </Button>
+              </form>
+            );
+          })()}
         </DialogContent>
       </Dialog>
 
