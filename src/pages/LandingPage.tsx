@@ -493,35 +493,34 @@ const LandingPage = () => {
                   <h3 className="font-display text-lg font-semibold">Reach us</h3>
                   <div className="flex items-start gap-3">
                     <MapPin className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-                    <div>
-                      <p className="text-sm font-semibold">Alyah HQ</p>
-                      <p className="text-sm text-muted-foreground">Bole Road, Addis Ababa, Ethiopia</p>
+                    <div className="text-sm">
+                      <p className="font-semibold">Address</p>
+                      <p className="text-muted-foreground">Bahir Dar, Kebele 17</p>
+                      <p className="text-muted-foreground">Ambaye Building, 3rd Floor</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Phone className="h-5 w-5 text-primary shrink-0" />
-                    <p className="text-sm">+251 911 123 456</p>
+                  <div className="flex items-start gap-3">
+                    <Phone className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                    <div className="text-sm">
+                      <p className="font-semibold">Phone</p>
+                      <a href="tel:+251928775577" className="block text-muted-foreground hover:text-primary">+251-92-877-5577</a>
+                      <a href="tel:+251918174003" className="block text-muted-foreground hover:text-primary">+251-91-817-4003</a>
+                    </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <Mail className="h-5 w-5 text-primary shrink-0" />
-                    <p className="text-sm">info@alyahmenu.com</p>
+                    <a href="https://www.alyahsoftware.com" target="_blank" rel="noreferrer" className="text-sm hover:text-primary">www.alyahsoftware.com</a>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <Clock className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-                    <div className="text-sm">
-                      <p>Mon – Fri: 9:00 AM – 6:00 PM</p>
-                      <p>Sat: 10:00 AM – 2:00 PM</p>
+                  <div className="pt-2 border-t border-border">
+                    <p className="text-sm font-semibold mb-2">Follow us</p>
+                    <div className="flex flex-wrap gap-2">
+                      <a href="https://www.tiktok.com/@aezop_freelance?_r=1&_t=ZS-93uwbkytVCe" target="_blank" rel="noreferrer" className="px-3 py-1.5 rounded-full text-xs font-medium bg-muted hover:bg-primary hover:text-primary-foreground transition-colors">TikTok</a>
+                      <a href="https://www.facebook.com/profile.php?id=100065420744158" target="_blank" rel="noreferrer" className="px-3 py-1.5 rounded-full text-xs font-medium bg-muted hover:bg-primary hover:text-primary-foreground transition-colors inline-flex items-center gap-1"><Facebook className="h-3 w-3" /> Facebook</a>
+                      <a href="https://www.instagram.com/alyah_software?igsh=MXJveTNtbXR3c2h2YQ==" target="_blank" rel="noreferrer" className="px-3 py-1.5 rounded-full text-xs font-medium bg-muted hover:bg-primary hover:text-primary-foreground transition-colors inline-flex items-center gap-1"><Instagram className="h-3 w-3" /> Instagram</a>
+                      <a href="https://t.me/alyahsoftware2" target="_blank" rel="noreferrer" className="px-3 py-1.5 rounded-full text-xs font-medium bg-muted hover:bg-primary hover:text-primary-foreground transition-colors">Telegram</a>
                     </div>
                   </div>
                 </CardContent>
-              </Card>
-              <Card className="shadow-card border-0 overflow-hidden">
-                <iframe
-                  title="Alyah HQ Location"
-                  src="https://www.openstreetmap.org/export/embed.html?bbox=38.74%2C8.99%2C38.80%2C9.03&layer=mapnik"
-                  className="w-full h-56 border-0"
-                  loading="lazy"
-                />
               </Card>
             </div>
           </div>
