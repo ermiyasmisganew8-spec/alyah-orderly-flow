@@ -58,13 +58,30 @@ const LandingPage = () => {
     setMobileMenu(false);
   };
 
+  const branchLimitFor = (pkg?: Pkg) => {
+    const n = (pkg?.name || '').toLowerCase();
+    if (n.includes('premium')) return 5;
+    if (n.includes('standard')) return 3;
+    return 1;
+  };
+
   const openRegister = (packageId?: string) => {
-    if (packageId) {
-      setForm(f => ({ ...f, package_id: packageId, billing_cycle: yearly ? 'yearly' : 'monthly' }));
-    } else if (!form.package_id && packages[0]) {
-      setForm(f => ({ ...f, package_id: packages[0].id, billing_cycle: yearly ? 'yearly' : 'monthly' }));
+    const pkg = packages.find(p => p.id === packageId) || packages[0];
+    if (pkg) {
+      const limit = branchLimitFor(pkg);
+      setForm(f => ({
+        ...f,
+        package_id: pkg.id,
+        billing_cycle: yearly ? 'yearly' : 'monthly',
+        branch_count: limit === 1 ? '1' : f.branch_count && Number(f.branch_count) <= limit ? f.branch_count : '1',
+      }));
     }
     setRegisterModal(true);
+    setMobileMenu(false);
+  };
+
+  const scrollToPricing = () => {
+    pricingRef.current?.scrollIntoView({ behavior: 'smooth' });
     setMobileMenu(false);
   };
 
@@ -73,12 +90,19 @@ const LandingPage = () => {
     setSubmitting(true);
     try {
       const selectedPkg = packages.find(p => p.id === form.package_id);
+      const limit = branchLimitFor(selectedPkg);
+      const branches = Number(form.branch_count);
+      if (!branches || branches < 1 || branches > limit) {
+        toast.error(`Number of branches must be between 1 and ${limit} for ${selectedPkg?.name}`);
+        setSubmitting(false);
+        return;
+      }
       const payload: any = {
         restaurant_name: form.restaurant_name,
         owner_name: form.owner_name,
         email: form.email,
         phone: form.phone,
-        branch_count: form.branch_count,
+        branch_count: String(branches),
         notes: form.notes,
         package_id: form.package_id || null,
         billing_cycle: form.billing_cycle,
@@ -161,7 +185,7 @@ const LandingPage = () => {
             <button onClick={() => scrollTo(pricingRef)} className="text-sm text-muted-foreground hover:text-foreground transition">Pricing</button>
             <button onClick={() => scrollTo(contactRef)} className="text-sm text-muted-foreground hover:text-foreground transition">Contact</button>
             <Button variant="outline" size="sm" onClick={() => navigate('/login')}>Login</Button>
-            <Button size="sm" onClick={() => openRegister()}>Request Access</Button>
+            <Button size="sm" onClick={scrollToPricing}>Request Access</Button>
           </nav>
           <button className="md:hidden" onClick={() => setMobileMenu(!mobileMenu)}>
             {mobileMenu ? <X className="h-6 w-6" /> : <MenuIcon className="h-6 w-6" />}
@@ -173,7 +197,7 @@ const LandingPage = () => {
             <button onClick={() => scrollTo(pricingRef)} className="block w-full text-left text-sm py-2">Pricing</button>
             <button onClick={() => scrollTo(contactRef)} className="block w-full text-left text-sm py-2">Contact</button>
             <Button variant="outline" size="sm" className="w-full" onClick={() => { setMobileMenu(false); navigate('/login'); }}>Login</Button>
-            <Button size="sm" className="w-full" onClick={() => openRegister()}>Request Access</Button>
+            <Button size="sm" className="w-full" onClick={scrollToPricing}>Request Access</Button>
           </div>
         )}
       </header>
@@ -196,8 +220,8 @@ const LandingPage = () => {
             Increase table turnover, reduce order errors, and get real-time analytics — all in one SaaS platform.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5" onClick={() => openRegister()}>
-              Request a Demo <ArrowRight className="ml-2 h-4 w-4" />
+            <Button size="lg" className="shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5" onClick={scrollToPricing}>
+              Request Access <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
             <Button size="lg" variant="outline" className="bg-white/10 backdrop-blur text-white border-white/40 hover:bg-white/20 hover:text-white" onClick={() => setVideoModal(true)}>
               <Play className="mr-2 h-4 w-4" /> Watch Demo
@@ -313,85 +337,91 @@ const LandingPage = () => {
           <DialogHeader>
             <DialogTitle className="font-display text-xl">Request Access</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div><Label>Restaurant Name *</Label><Input value={form.restaurant_name} onChange={e => setForm(f => ({ ...f, restaurant_name: e.target.value }))} required /></div>
-            <div><Label>Owner Full Name *</Label><Input value={form.owner_name} onChange={e => setForm(f => ({ ...f, owner_name: e.target.value }))} required /></div>
-            <div className="grid grid-cols-2 gap-4">
-              <div><Label>Email *</Label><Input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required /></div>
-              <div><Label>Phone *</Label><Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} required /></div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div><Label>Number of Branches</Label>
-                <Select value={form.branch_count} onValueChange={v => setForm(f => ({ ...f, branch_count: v }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="1">1</SelectItem>
-                    <SelectItem value="2-5">2–5</SelectItem>
-                    <SelectItem value="6+">6+</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div><Label>Billing Cycle</Label>
-                <Select value={form.billing_cycle} onValueChange={v => setForm(f => ({ ...f, billing_cycle: v }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="monthly">Monthly</SelectItem>
-                    <SelectItem value="yearly">Yearly</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div>
-              <Label>Selected Package *</Label>
-              <div className="grid grid-cols-3 gap-2 mt-2">
-                {packages.map(p => {
-                  const price = form.billing_cycle === 'yearly' ? p.yearly_price : p.monthly_price;
-                  const selected = form.package_id === p.id;
-                  return (
-                    <button
-                      type="button"
-                      key={p.id}
-                      onClick={() => setForm(f => ({ ...f, package_id: p.id }))}
-                      className={`text-left p-3 rounded-lg border transition-all ${
-                        selected ? 'border-primary bg-primary/10 ring-2 ring-primary' : 'border-border hover:border-primary/50'
-                      }`}
-                    >
-                      <p className="font-semibold text-sm">{p.name}</p>
-                      <p className="text-xs text-primary font-bold">{price.toLocaleString()} ETB</p>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            <div>
-              <Label>Payment Method *</Label>
-              <div className="grid grid-cols-2 gap-2 mt-2">
-                {[
-                  { value: 'telebirr', label: 'Telebirr' },
-                  { value: 'cbe', label: 'CBE' },
-                ].map(opt => {
-                  const selected = form.payment_method === opt.value;
-                  return (
-                    <button
-                      type="button"
-                      key={opt.value}
-                      onClick={() => setForm(f => ({ ...f, payment_method: opt.value }))}
-                      className={`p-3 rounded-lg border text-sm font-medium transition-all ${
-                        selected ? 'border-primary bg-primary/10 ring-2 ring-primary' : 'border-border hover:border-primary/50'
-                      }`}
-                    >
-                      {opt.label}
-                    </button>
-                  );
-                })}
-              </div>
-              <p className="text-xs text-muted-foreground mt-1">Mock — actual payment processed offline after approval.</p>
-            </div>
-            <div><Label>Additional Notes</Label><Textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={3} /></div>
-            <Button type="submit" className="w-full" disabled={submitting || !form.package_id}>
-              {submitting ? 'Submitting...' : 'Submit Request'}
-            </Button>
-          </form>
+          {(() => {
+            const selectedPkg = packages.find(p => p.id === form.package_id);
+            const limit = branchLimitFor(selectedPkg);
+            const price = form.billing_cycle === 'yearly' ? selectedPkg?.yearly_price : selectedPkg?.monthly_price;
+            const cycleLabel = form.billing_cycle === 'yearly' ? '/yr' : '/mo';
+            return (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {selectedPkg && (
+                  <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-muted-foreground">You selected</p>
+                      <p className="font-display text-lg font-semibold">{selectedPkg.name} Plan</p>
+                      <p className="text-xs text-muted-foreground">Up to {limit} branch{limit > 1 ? 'es' : ''}</p>
+                    </div>
+                    {price !== undefined && (
+                      <p className="text-xl font-bold text-primary">{price.toLocaleString()} ETB<span className="text-xs font-normal text-muted-foreground">{cycleLabel}</span></p>
+                    )}
+                  </div>
+                )}
+                <div><Label>Restaurant Name *</Label><Input value={form.restaurant_name} onChange={e => setForm(f => ({ ...f, restaurant_name: e.target.value }))} required /></div>
+                <div><Label>Owner Full Name *</Label><Input value={form.owner_name} onChange={e => setForm(f => ({ ...f, owner_name: e.target.value }))} required /></div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div><Label>Email *</Label><Input type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} required /></div>
+                  <div><Label>Phone *</Label><Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} required /></div>
+                </div>
+                <div>
+                  <Label>Number of Branches * <span className="text-xs text-muted-foreground">(1–{limit})</span></Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={limit}
+                    value={form.branch_count}
+                    disabled={limit === 1}
+                    onChange={e => setForm(f => ({ ...f, branch_count: e.target.value }))}
+                    required
+                  />
+                  {limit === 1 && <p className="text-xs text-muted-foreground mt-1">Basic plan includes 1 branch.</p>}
+                  {Number(form.branch_count) > limit && (
+                    <p className="text-xs text-destructive mt-1">Maximum {limit} branch{limit > 1 ? 'es' : ''} for this plan.</p>
+                  )}
+                </div>
+                <div>
+                  <Label>Billing Cycle *</Label>
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    {[{ value: 'monthly', label: 'Monthly' }, { value: 'yearly', label: 'Yearly' }].map(opt => {
+                      const sel = form.billing_cycle === opt.value;
+                      return (
+                        <button
+                          type="button"
+                          key={opt.value}
+                          onClick={() => setForm(f => ({ ...f, billing_cycle: opt.value }))}
+                          className={`p-3 rounded-lg border text-sm font-medium transition-all ${sel ? 'border-primary bg-primary/10 ring-2 ring-primary' : 'border-border hover:border-primary/50'}`}
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+                <div>
+                  <Label>Payment Method *</Label>
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    {[{ value: 'telebirr', label: 'Telebirr' }, { value: 'cbe', label: 'CBE' }].map(opt => {
+                      const sel = form.payment_method === opt.value;
+                      return (
+                        <button
+                          type="button"
+                          key={opt.value}
+                          onClick={() => setForm(f => ({ ...f, payment_method: opt.value }))}
+                          className={`p-3 rounded-lg border text-sm font-medium transition-all ${sel ? 'border-primary bg-primary/10 ring-2 ring-primary' : 'border-border hover:border-primary/50'}`}
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">Payment processed offline after approval.</p>
+                </div>
+                <div><Label>Additional Notes</Label><Textarea value={form.notes} onChange={e => setForm(f => ({ ...f, notes: e.target.value }))} rows={3} /></div>
+                <Button type="submit" className="w-full" disabled={submitting || !form.package_id || Number(form.branch_count) < 1 || Number(form.branch_count) > limit}>
+                  {submitting ? 'Submitting...' : 'Submit Request'}
+                </Button>
+              </form>
+            );
+          })()}
         </DialogContent>
       </Dialog>
 
@@ -463,35 +493,34 @@ const LandingPage = () => {
                   <h3 className="font-display text-lg font-semibold">Reach us</h3>
                   <div className="flex items-start gap-3">
                     <MapPin className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-                    <div>
-                      <p className="text-sm font-semibold">Alyah HQ</p>
-                      <p className="text-sm text-muted-foreground">Bole Road, Addis Ababa, Ethiopia</p>
+                    <div className="text-sm">
+                      <p className="font-semibold">Address</p>
+                      <p className="text-muted-foreground">Bahir Dar, Kebele 17</p>
+                      <p className="text-muted-foreground">Ambaye Building, 3rd Floor</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Phone className="h-5 w-5 text-primary shrink-0" />
-                    <p className="text-sm">+251 911 123 456</p>
+                  <div className="flex items-start gap-3">
+                    <Phone className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                    <div className="text-sm">
+                      <p className="font-semibold">Phone</p>
+                      <a href="tel:+251928775577" className="block text-muted-foreground hover:text-primary">+251-92-877-5577</a>
+                      <a href="tel:+251918174003" className="block text-muted-foreground hover:text-primary">+251-91-817-4003</a>
+                    </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <Mail className="h-5 w-5 text-primary shrink-0" />
-                    <p className="text-sm">info@alyahmenu.com</p>
+                    <a href="https://www.alyahsoftware.com" target="_blank" rel="noreferrer" className="text-sm hover:text-primary">www.alyahsoftware.com</a>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <Clock className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-                    <div className="text-sm">
-                      <p>Mon – Fri: 9:00 AM – 6:00 PM</p>
-                      <p>Sat: 10:00 AM – 2:00 PM</p>
+                  <div className="pt-2 border-t border-border">
+                    <p className="text-sm font-semibold mb-2">Follow us</p>
+                    <div className="flex flex-wrap gap-2">
+                      <a href="https://www.tiktok.com/@aezop_freelance?_r=1&_t=ZS-93uwbkytVCe" target="_blank" rel="noreferrer" className="px-3 py-1.5 rounded-full text-xs font-medium bg-muted hover:bg-primary hover:text-primary-foreground transition-colors">TikTok</a>
+                      <a href="https://www.facebook.com/profile.php?id=100065420744158" target="_blank" rel="noreferrer" className="px-3 py-1.5 rounded-full text-xs font-medium bg-muted hover:bg-primary hover:text-primary-foreground transition-colors inline-flex items-center gap-1"><Facebook className="h-3 w-3" /> Facebook</a>
+                      <a href="https://www.instagram.com/alyah_software?igsh=MXJveTNtbXR3c2h2YQ==" target="_blank" rel="noreferrer" className="px-3 py-1.5 rounded-full text-xs font-medium bg-muted hover:bg-primary hover:text-primary-foreground transition-colors inline-flex items-center gap-1"><Instagram className="h-3 w-3" /> Instagram</a>
+                      <a href="https://t.me/alyahsoftware2" target="_blank" rel="noreferrer" className="px-3 py-1.5 rounded-full text-xs font-medium bg-muted hover:bg-primary hover:text-primary-foreground transition-colors">Telegram</a>
                     </div>
                   </div>
                 </CardContent>
-              </Card>
-              <Card className="shadow-card border-0 overflow-hidden">
-                <iframe
-                  title="Alyah HQ Location"
-                  src="https://www.openstreetmap.org/export/embed.html?bbox=38.74%2C8.99%2C38.80%2C9.03&layer=mapnik"
-                  className="w-full h-56 border-0"
-                  loading="lazy"
-                />
               </Card>
             </div>
           </div>
@@ -510,7 +539,7 @@ const LandingPage = () => {
             <div className="space-y-2 text-sm">
               <button onClick={() => scrollTo(featuresRef)} className="block text-gray-300 hover:text-white transition-colors">Features</button>
               <button onClick={() => scrollTo(pricingRef)} className="block text-gray-300 hover:text-white transition-colors">Pricing</button>
-              <button onClick={() => openRegister()} className="block text-gray-300 hover:text-white transition-colors">Request Access</button>
+              <button onClick={scrollToPricing} className="block text-gray-300 hover:text-white transition-colors">Request Access</button>
             </div>
           </div>
           <div>
@@ -523,18 +552,20 @@ const LandingPage = () => {
           <div>
             <h4 className="font-semibold text-sm mb-3 text-white">Contact</h4>
             <div className="space-y-2 text-sm text-gray-300">
-              <p className="flex items-center gap-2"><Mail className="h-4 w-4" /> info@alyahmenu.com</p>
-              <p className="flex items-center gap-2"><Phone className="h-4 w-4" /> +251 911 123 456</p>
-              <p className="flex items-center gap-2"><MapPin className="h-4 w-4" /> Addis Ababa, Ethiopia</p>
+              <p className="flex items-start gap-2"><MapPin className="h-4 w-4 mt-0.5 shrink-0" /> Bahir Dar, Kebele 17, Ambaye Bldg, 3rd Flr</p>
+              <a href="tel:+251928775577" className="flex items-center gap-2 hover:text-white"><Phone className="h-4 w-4" /> +251-92-877-5577</a>
+              <a href="tel:+251918174003" className="flex items-center gap-2 hover:text-white"><Phone className="h-4 w-4" /> +251-91-817-4003</a>
+              <a href="https://www.alyahsoftware.com" target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-white"><Mail className="h-4 w-4" /> www.alyahsoftware.com</a>
             </div>
           </div>
         </div>
         <div className="max-w-7xl mx-auto mt-8 pt-6 border-t border-gray-700 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-gray-300">
           <span>© {new Date().getFullYear()} Alyah Menu. All rights reserved.</span>
           <div className="flex gap-3">
-            <a href="#" aria-label="Facebook" className="w-8 h-8 rounded-full bg-gray-800 hover:bg-orange-300 hover:text-gray-900 flex items-center justify-center transition-colors"><Facebook className="h-4 w-4" /></a>
-            <a href="#" aria-label="Instagram" className="w-8 h-8 rounded-full bg-gray-800 hover:bg-orange-300 hover:text-gray-900 flex items-center justify-center transition-colors"><Instagram className="h-4 w-4" /></a>
-            <a href="#" aria-label="LinkedIn" className="w-8 h-8 rounded-full bg-gray-800 hover:bg-orange-300 hover:text-gray-900 flex items-center justify-center transition-colors"><Linkedin className="h-4 w-4" /></a>
+            <a href="https://www.facebook.com/profile.php?id=100065420744158" target="_blank" rel="noreferrer" aria-label="Facebook" className="w-8 h-8 rounded-full bg-gray-800 hover:bg-orange-300 hover:text-gray-900 flex items-center justify-center transition-colors"><Facebook className="h-4 w-4" /></a>
+            <a href="https://www.instagram.com/alyah_software?igsh=MXJveTNtbXR3c2h2YQ==" target="_blank" rel="noreferrer" aria-label="Instagram" className="w-8 h-8 rounded-full bg-gray-800 hover:bg-orange-300 hover:text-gray-900 flex items-center justify-center transition-colors"><Instagram className="h-4 w-4" /></a>
+            <a href="https://www.tiktok.com/@aezop_freelance?_r=1&_t=ZS-93uwbkytVCe" target="_blank" rel="noreferrer" aria-label="TikTok" className="w-8 h-8 rounded-full bg-gray-800 hover:bg-orange-300 hover:text-gray-900 flex items-center justify-center transition-colors text-xs font-bold">TT</a>
+            <a href="https://t.me/alyahsoftware2" target="_blank" rel="noreferrer" aria-label="Telegram" className="w-8 h-8 rounded-full bg-gray-800 hover:bg-orange-300 hover:text-gray-900 flex items-center justify-center transition-colors text-xs font-bold">TG</a>
           </div>
         </div>
       </footer>
