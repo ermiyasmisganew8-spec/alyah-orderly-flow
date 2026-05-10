@@ -185,7 +185,7 @@ const LandingPage = () => {
             <button onClick={() => scrollTo(pricingRef)} className="text-sm text-muted-foreground hover:text-foreground transition">Pricing</button>
             <button onClick={() => scrollTo(contactRef)} className="text-sm text-muted-foreground hover:text-foreground transition">Contact</button>
             <Button variant="outline" size="sm" onClick={() => navigate('/login')}>Login</Button>
-            <Button size="sm" onClick={() => openRegister()}>Request Access</Button>
+            <Button size="sm" onClick={scrollToPricing}>Request Access</Button>
           </nav>
           <button className="md:hidden" onClick={() => setMobileMenu(!mobileMenu)}>
             {mobileMenu ? <X className="h-6 w-6" /> : <MenuIcon className="h-6 w-6" />}
@@ -197,7 +197,7 @@ const LandingPage = () => {
             <button onClick={() => scrollTo(pricingRef)} className="block w-full text-left text-sm py-2">Pricing</button>
             <button onClick={() => scrollTo(contactRef)} className="block w-full text-left text-sm py-2">Contact</button>
             <Button variant="outline" size="sm" className="w-full" onClick={() => { setMobileMenu(false); navigate('/login'); }}>Login</Button>
-            <Button size="sm" className="w-full" onClick={() => openRegister()}>Request Access</Button>
+            <Button size="sm" className="w-full" onClick={scrollToPricing}>Request Access</Button>
           </div>
         )}
       </header>
@@ -534,7 +534,7 @@ const LandingPage = () => {
             <div className="space-y-2 text-sm">
               <button onClick={() => scrollTo(featuresRef)} className="block text-gray-300 hover:text-white transition-colors">Features</button>
               <button onClick={() => scrollTo(pricingRef)} className="block text-gray-300 hover:text-white transition-colors">Pricing</button>
-              <button onClick={() => openRegister()} className="block text-gray-300 hover:text-white transition-colors">Request Access</button>
+              <button onClick={scrollToPricing} className="block text-gray-300 hover:text-white transition-colors">Request Access</button>
             </div>
           </div>
           <div>
