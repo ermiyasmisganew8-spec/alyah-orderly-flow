@@ -220,8 +220,8 @@ const LandingPage = () => {
             Increase table turnover, reduce order errors, and get real-time analytics — all in one SaaS platform.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5" onClick={() => openRegister()}>
-              Request a Demo <ArrowRight className="ml-2 h-4 w-4" />
+            <Button size="lg" className="shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5" onClick={scrollToPricing}>
+              Request Access <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
             <Button size="lg" variant="outline" className="bg-white/10 backdrop-blur text-white border-white/40 hover:bg-white/20 hover:text-white" onClick={() => setVideoModal(true)}>
               <Play className="mr-2 h-4 w-4" /> Watch Demo
