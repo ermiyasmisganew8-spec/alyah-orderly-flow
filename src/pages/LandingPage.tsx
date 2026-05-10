@@ -552,18 +552,20 @@ const LandingPage = () => {
           <div>
             <h4 className="font-semibold text-sm mb-3 text-white">Contact</h4>
             <div className="space-y-2 text-sm text-gray-300">
-              <p className="flex items-center gap-2"><Mail className="h-4 w-4" /> info@alyahmenu.com</p>
-              <p className="flex items-center gap-2"><Phone className="h-4 w-4" /> +251 911 123 456</p>
-              <p className="flex items-center gap-2"><MapPin className="h-4 w-4" /> Addis Ababa, Ethiopia</p>
+              <p className="flex items-start gap-2"><MapPin className="h-4 w-4 mt-0.5 shrink-0" /> Bahir Dar, Kebele 17, Ambaye Bldg, 3rd Flr</p>
+              <a href="tel:+251928775577" className="flex items-center gap-2 hover:text-white"><Phone className="h-4 w-4" /> +251-92-877-5577</a>
+              <a href="tel:+251918174003" className="flex items-center gap-2 hover:text-white"><Phone className="h-4 w-4" /> +251-91-817-4003</a>
+              <a href="https://www.alyahsoftware.com" target="_blank" rel="noreferrer" className="flex items-center gap-2 hover:text-white"><Mail className="h-4 w-4" /> www.alyahsoftware.com</a>
             </div>
           </div>
         </div>
         <div className="max-w-7xl mx-auto mt-8 pt-6 border-t border-gray-700 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-gray-300">
           <span>© {new Date().getFullYear()} Alyah Menu. All rights reserved.</span>
           <div className="flex gap-3">
-            <a href="#" aria-label="Facebook" className="w-8 h-8 rounded-full bg-gray-800 hover:bg-orange-300 hover:text-gray-900 flex items-center justify-center transition-colors"><Facebook className="h-4 w-4" /></a>
-            <a href="#" aria-label="Instagram" className="w-8 h-8 rounded-full bg-gray-800 hover:bg-orange-300 hover:text-gray-900 flex items-center justify-center transition-colors"><Instagram className="h-4 w-4" /></a>
-            <a href="#" aria-label="LinkedIn" className="w-8 h-8 rounded-full bg-gray-800 hover:bg-orange-300 hover:text-gray-900 flex items-center justify-center transition-colors"><Linkedin className="h-4 w-4" /></a>
+            <a href="https://www.facebook.com/profile.php?id=100065420744158" target="_blank" rel="noreferrer" aria-label="Facebook" className="w-8 h-8 rounded-full bg-gray-800 hover:bg-orange-300 hover:text-gray-900 flex items-center justify-center transition-colors"><Facebook className="h-4 w-4" /></a>
+            <a href="https://www.instagram.com/alyah_software?igsh=MXJveTNtbXR3c2h2YQ==" target="_blank" rel="noreferrer" aria-label="Instagram" className="w-8 h-8 rounded-full bg-gray-800 hover:bg-orange-300 hover:text-gray-900 flex items-center justify-center transition-colors"><Instagram className="h-4 w-4" /></a>
+            <a href="https://www.tiktok.com/@aezop_freelance?_r=1&_t=ZS-93uwbkytVCe" target="_blank" rel="noreferrer" aria-label="TikTok" className="w-8 h-8 rounded-full bg-gray-800 hover:bg-orange-300 hover:text-gray-900 flex items-center justify-center transition-colors text-xs font-bold">TT</a>
+            <a href="https://t.me/alyahsoftware2" target="_blank" rel="noreferrer" aria-label="Telegram" className="w-8 h-8 rounded-full bg-gray-800 hover:bg-orange-300 hover:text-gray-900 flex items-center justify-center transition-colors text-xs font-bold">TG</a>
           </div>
         </div>
       </footer>
