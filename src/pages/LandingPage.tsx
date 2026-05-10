@@ -90,7 +90,6 @@ const LandingPage = () => {
     setSubmitting(true);
     try {
       const selectedPkg = packages.find(p => p.id === form.package_id);
-      const selectedPkg = packages.find(p => p.id === form.package_id);
       const limit = branchLimitFor(selectedPkg);
       const branches = Number(form.branch_count);
       if (!branches || branches < 1 || branches > limit) {
