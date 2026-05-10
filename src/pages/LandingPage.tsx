@@ -90,12 +90,20 @@ const LandingPage = () => {
     setSubmitting(true);
     try {
       const selectedPkg = packages.find(p => p.id === form.package_id);
+      const selectedPkg = packages.find(p => p.id === form.package_id);
+      const limit = branchLimitFor(selectedPkg);
+      const branches = Number(form.branch_count);
+      if (!branches || branches < 1 || branches > limit) {
+        toast.error(`Number of branches must be between 1 and ${limit} for ${selectedPkg?.name}`);
+        setSubmitting(false);
+        return;
+      }
       const payload: any = {
         restaurant_name: form.restaurant_name,
         owner_name: form.owner_name,
         email: form.email,
         phone: form.phone,
-        branch_count: form.branch_count,
+        branch_count: String(branches),
         notes: form.notes,
         package_id: form.package_id || null,
         billing_cycle: form.billing_cycle,
